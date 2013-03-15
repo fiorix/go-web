@@ -22,7 +22,12 @@ type RequestHandler struct {
 }
 
 func (req *RequestHandler) Write(f string, a ...interface{}) (n int, err error) {
-	return fmt.Fprintf(req.Writer, f, a)
+	if a != nil {
+		n, err = fmt.Fprintf(req.Writer, f, a...)
+	} else {
+		n, err = fmt.Fprintf(req.Writer, f)
+	}
+	return
 }
 
 func (req *RequestHandler) Render(t string, a interface{}) error {
