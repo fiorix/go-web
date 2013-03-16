@@ -188,12 +188,13 @@ func checkQuota(mc *memcache.Client, db *sql.DB,
 			count, _ := strconv.Atoi(string(el.Value))
 			if count < maxRequestsPerIP {
 				mc.Increment(k, 1)
-				fn(req, db)  // do the lookup
 			} else {
 				req.HTTPError(403)
 				return
 			}
 		}
+
+		fn(req, db)  // do the lookup
 	}
 }
 
