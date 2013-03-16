@@ -82,6 +82,7 @@ type Settings struct {
 	Debug bool
 	ReadTimeout time.Duration
 	TemplatePath string
+	XHeaders bool
 }
 
 type Server struct {
@@ -90,17 +91,36 @@ type Server struct {
 	templates *template.Template
 }
 
+func execute(fn func(RequestHandler), req RequestHandler) {
+	var now time.Time
+	if req.Server.settings.Debug {
+		now = time.Now()
+	}
+	if req.Server.settings.XHeaders {
+		addr := req.HTTP.Header.Get("X-Real-IP")
+		if addr == "" {
+			addr = req.HTTP.Header.Get("X-Forwarded-For")
+		}
+
+		if addr != "" {
+			req.HTTP.RemoteAddr = addr
+		}
+	}
+	fn(req)  // execute the HandlerFunc
+	if req.Server.settings.Debug {
+		log.Printf("%s %s (%s) %dµs",
+				req.HTTP.Method,
+				req.HTTP.URL.Path,
+				req.HTTP.RemoteAddr,
+				time.Since(now)/time.Microsecond)
+	}
+}
+
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, p := range srv.routes {
 		vars := p.re.FindStringSubmatch(r.URL.Path)
 		if len(vars) >= 1 {
-			now := time.Now()
-			p.fn(RequestHandler{w, r, srv, vars})
-			if srv.settings.Debug {
-				log.Printf("%s %s (%s) %dµs",
-					r.Method, r.URL.Path, r.RemoteAddr,
-					time.Since(now)/time.Microsecond)
-			}
+			execute(p.fn, RequestHandler{w, r, srv, vars})
 			return
 		}
 	}

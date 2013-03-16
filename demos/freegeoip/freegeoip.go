@@ -192,5 +192,6 @@ func main() {
 		{"^/(crossdomain.xml)$", StaticHandler},
 		{"^/(csv|json|xml)/(.*)$", makeHandler(db, LookupHandler)},
 	}
-	web.Application(":8080", handlers, &web.Settings{Debug:true})
+	web.Application(":8080", handlers,
+			&web.Settings{Debug:true, XHeaders:false})
 }
