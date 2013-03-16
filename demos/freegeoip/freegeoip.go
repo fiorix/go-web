@@ -23,7 +23,7 @@ type GeoIP struct {
     XMLName	xml.Name	`json:"-" xml:"Response"`
     Ip		string		`json:"ip"`
     CountryCode string		`json:"country_code"`
-    CountryName string		`json:"contry_name"`
+    CountryName string		`json:"country_name"`
     RegionCode	string		`json:"region_code"`
     RegionName	string		`json:"region_name"`
     CityName	string		`json:"city" xml:"City"`
@@ -56,6 +56,7 @@ var reservedIPs = []net.IPNet{
 }
 
 func LookupHandler(req web.RequestHandler, db *sql.DB) {
+        req.SetHeader("Access-Control-Allow-Origin", "*")
 	format, addr := req.Vars[1], req.Vars[2]
 	if addr == "" {
 		addr = strings.Split(req.HTTP.RemoteAddr, ":")[0]
