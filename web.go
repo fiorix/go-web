@@ -1,7 +1,6 @@
-/* Copyright 2013 Alexandre Fiori
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
+// Copyright 2013 Alexandre Fiori
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 package web
 
@@ -11,7 +10,9 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"log"
 	"regexp"
+	"time"
 )
 
 type RequestHandler struct {
@@ -21,6 +22,42 @@ type RequestHandler struct {
 	Vars []string
 }
 
+func (req *RequestHandler) HTTPError(n int, err error) {
+	http.Error(req.Writer, err.Error(), n)
+}
+
+func (req *RequestHandler) NotFound() {
+	http.NotFound(req.Writer, req.HTTP)
+}
+
+func (req *RequestHandler) Redirect(url string) {
+	http.Redirect(req.Writer, req.HTTP, url, http.StatusFound)
+}
+
+func (req *RequestHandler) Render(t string, a interface{}) error {
+	if req.Server.templates == nil {
+		e := errors.New("TemplatePath not set in web.Settings")
+		if req.Server.settings.Debug {
+			log.Println(e)
+		}
+		return e
+	}
+
+	err := req.Server.templates.ExecuteTemplate(req.Writer, t, a)
+	if err != nil && req.Server.settings.Debug {
+		log.Println(err)
+	}
+	return err
+}
+
+func (req *RequestHandler) ServeFile(name string) {
+	http.ServeFile(req.Writer, req.HTTP, name)
+}
+
+func (req *RequestHandler) SetHeader(k string, v string) {
+	req.Writer.Header().Set(k, v)
+}
+
 func (req *RequestHandler) Write(f string, a ...interface{}) (n int, err error) {
 	if a != nil {
 		n, err = fmt.Fprintf(req.Writer, f, a...)
@@ -28,34 +65,6 @@ func (req *RequestHandler) Write(f string, a ...interface{}) (n int, err error) 
 		n, err = fmt.Fprintf(req.Writer, f)
 	}
 	return
-}
-
-func (req *RequestHandler) Render(t string, a interface{}) error {
-	if req.Server.templates == nil {
-		e := errors.New("TemplatePath not set in web.Settings")
-		if req.Server.settings.Debug {
-			fmt.Println(e)
-		}
-		return e
-	}
-
-	err := req.Server.templates.ExecuteTemplate(req.Writer, t, a)
-	if err != nil && req.Server.settings.Debug {
-		fmt.Println(err)
-	}
-	return err
-}
-
-func (req *RequestHandler) Redirect(url string) {
-	http.Redirect(req.Writer, req.HTTP, url, http.StatusFound)
-}
-
-func (req *RequestHandler) NotFound() {
-	http.NotFound(req.Writer, req.HTTP)
-}
-
-func (req *RequestHandler) HTTPError(n int, err error) {
-	http.Error(req.Writer, err.Error(), n)
 }
 
 type HandlerFunc func(req RequestHandler)
@@ -71,6 +80,7 @@ type route struct {
 
 type Settings struct {
 	Debug bool
+	ReadTimeout time.Duration
 	TemplatePath string
 }
 
@@ -84,7 +94,13 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, p := range srv.routes {
 		vars := p.re.FindStringSubmatch(r.URL.Path)
 		if len(vars) >= 1 {
+			now := time.Now()
 			p.fn(RequestHandler{w, r, srv, vars})
+			if srv.settings.Debug {
+				log.Printf("%s %s (%s) %dµs",
+					r.Method, r.URL.Path, r.RemoteAddr,
+					time.Since(now)/time.Microsecond)
+			}
 			return
 		}
 	}
@@ -104,9 +120,14 @@ func Application(addr string, h []Handler, s *Settings) (*Server, error) {
 	}
 
 	if s.Debug {
-		fmt.Println("Starting server on", addr)
+		log.Println("Starting server on", addr)
 	}
 
+	timeout := 30*time.Second
+	if s.ReadTimeout >= 1 {
+		timeout = s.ReadTimeout
+	}
 	srv := Server{r, s, t}
-	return &srv, http.ListenAndServe(addr, &srv)
+	x := &http.Server{Addr: addr, Handler: &srv, ReadTimeout: timeout}
+	return &srv, x.ListenAndServe()
 }
