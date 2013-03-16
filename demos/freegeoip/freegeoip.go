@@ -7,7 +7,7 @@ package main
 import (
 	"bytes"
 	"database/sql"
-	_	"github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
 	"encoding/binary"
 	"encoding/json"
 	"encoding/xml"
@@ -64,7 +64,6 @@ var reservedIPs = []net.IPNet{
 }
 
 func LookupHandler(req web.RequestHandler, db *sql.DB) {
-        req.SetHeader("Access-Control-Allow-Origin", "*")
 	format, addr := req.Vars[1], req.Vars[2]
 	if addr == "" {
 		addr = strings.Split(req.HTTP.RemoteAddr, ":")[0]
@@ -171,6 +170,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 func checkQuota(mc *memcache.Client, db *sql.DB,
 		fn func(web.RequestHandler, *sql.DB)) web.HandlerFunc {
 	return func(req web.RequestHandler) {
+		req.SetHeader("Access-Control-Allow-Origin", "*")
 		k := strings.Split(req.HTTP.RemoteAddr, ":")[0]
 		el, err := mc.Get(k)
 		if err == memcache.ErrCacheMiss {
