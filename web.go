@@ -136,21 +136,22 @@ func Application(addr string, h []Handler, s *Settings) (*Server, error) {
 		path := filepath.Join(s.TemplatePath, "*.html")
 		t = template.Must(template.ParseGlob(path))
 	}
-
 	r := make([]route, len(h))
 	for n, handler := range h {
 		r[n] = route{regexp.MustCompile(handler.Re), handler.Fn}
 	}
-
 	if s.Debug {
 		log.Println("Starting server on", addr)
 	}
-
-	timeout := 30*time.Second
+	timeout := 0*time.Second  // Keep-alive might be your enemy here
 	if s.ReadTimeout >= 1 {
 		timeout = s.ReadTimeout
 	}
 	srv := Server{r, s, t}
 	x := &http.Server{Addr: addr, Handler: &srv, ReadTimeout: timeout}
-	return &srv, x.ListenAndServe()
+	err := x.ListenAndServe()
+	if err != nil && s.Debug {
+		log.Println("Error:", err)
+	}
+	return &srv, err
 }
