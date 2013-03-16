@@ -1,12 +1,10 @@
-/* Copyright 2013 Alexandre Fiori
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
+// Copyright 2013 Alexandre Fiori
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 package main
 
 import (
-	"fmt"
 	"github.com/fiorix/web"
 	"io/ioutil"
 	"path/filepath"
@@ -67,9 +65,7 @@ func editHandler(req web.RequestHandler) {
 	title := req.Vars[1]
 	p, err := loadPage(title)
 	if err != nil {
-		fmt.Println("err:", err)
 		p = &Page{Title: title}
-		fmt.Println("p=", p)
 	}
 	req.Render("edit.html", p)
 }
@@ -100,8 +96,5 @@ func main() {
 		TemplatePath: "./templates",
 	}
 
-	_, err := web.Application(":8080", handlers, &settings)
-	if err != nil {
-		fmt.Println(err)
-	}
+	web.Application(":8080", handlers, &settings)
 }

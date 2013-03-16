@@ -1,7 +1,6 @@
-/* Copyright 2013 Alexandre Fiori
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
+// Copyright 2013 Alexandre Fiori
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 package main
 
@@ -13,7 +12,7 @@ func IndexHandler(req web.RequestHandler) {
 
 func main() {
 	handlers := []web.Handler{
-		{"/", IndexHandler},
+		{"^/$", IndexHandler},
 	}
 	web.Application(":8080", handlers, &web.Settings{Debug:true})
 }
