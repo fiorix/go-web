@@ -12,11 +12,19 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/fiorix/web"
 	"net"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+)
+
+// API limits
+const (
+	maxRequestsPerIP = 1000
+	expirySeconds = 3600
 )
 
 type GeoIP struct {
@@ -160,9 +168,33 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 	}
 }
 
-func makeHandler(db *sql.DB,
-		 fn func(web.RequestHandler, *sql.DB)) web.HandlerFunc {
-	return func(req web.RequestHandler) { fn(req, db) }
+func checkQuota(mc *memcache.Client, db *sql.DB,
+		fn func(web.RequestHandler, *sql.DB)) web.HandlerFunc {
+	return func(req web.RequestHandler) {
+		k := strings.Split(req.HTTP.RemoteAddr, ":")[0]
+		el, err := mc.Get(k)
+		if err == memcache.ErrCacheMiss {
+			err = mc.Set(&memcache.Item{
+					Key: k, Value: []byte("1"),
+					Expiration: expirySeconds})
+		}
+
+		if err != nil {
+			req.HTTPError(503, err)
+			return
+		}
+
+		if el != nil {
+			count, _ := strconv.Atoi(string(el.Value))
+			if count < maxRequestsPerIP {
+				mc.Increment(k, 1)
+				fn(req, db)  // do the lookup
+			} else {
+				req.HTTPError(403)
+				return
+			}
+		}
+	}
 }
 
 // This is just for backwards compatibility with freegeoip.net
@@ -186,11 +218,12 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	mc := memcache.New("127.0.0.1:11211")
 	handlers := []web.Handler{
 		{"^/$", IndexHandler},
 		{"^/static/(.*)$", StaticHandler},
 		{"^/(crossdomain.xml)$", StaticHandler},
-		{"^/(csv|json|xml)/(.*)$", makeHandler(db, LookupHandler)},
+		{"^/(csv|json|xml)/(.*)$", checkQuota(mc, db, LookupHandler)},
 	}
 	web.Application(":8080", handlers,
 			&web.Settings{Debug:true, XHeaders:false})
