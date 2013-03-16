@@ -22,8 +22,11 @@ type RequestHandler struct {
 	Vars []string
 }
 
-func (req *RequestHandler) HTTPError(n int, err error) {
-	http.Error(req.Writer, err.Error(), n)
+func (req *RequestHandler) HTTPError(n int, err ...error) {
+	if err != nil && req.Server.settings.Debug {
+		log.Printf("HTTPError %d: %s", n, err[0])  // whine
+	}
+	http.Error(req.Writer, http.StatusText(n), n)
 }
 
 func (req *RequestHandler) NotFound() {
