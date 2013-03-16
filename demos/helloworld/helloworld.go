@@ -4,7 +4,7 @@
 
 package main
 
-import "github.com/fiorix/web"
+import "github.com/fiorix/go-web"
 
 func IndexHandler(req web.RequestHandler) {
 	req.Write("Hello, world")

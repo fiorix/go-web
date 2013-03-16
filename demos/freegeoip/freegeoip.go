@@ -13,7 +13,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/fiorix/web"
+	"github.com/fiorix/go-web"
 	"net"
 	"path/filepath"
 	"regexp"
