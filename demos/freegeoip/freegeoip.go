@@ -148,13 +148,19 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 			  geoip.Latitude, geoip.Longitude,
 			  geoip.MetroCode, geoip.AreaCode)
 	case 'j':
-		req.SetHeader("Content-Type", "application/json")
 		resp, err := json.Marshal(geoip)
 		if err != nil {
 			req.HTTPError(500, err)
 			return
 		}
-		req.Write("%s\r\n", resp)
+        callback := req.HTTP.URL.Query().Get("callback")
+        if callback != "" {
+            req.SetHeader("Content-Type", "text/javascript")
+            req.Write("%s(%s);\r\n", callback, resp)
+        } else {
+            req.SetHeader("Content-Type", "application/json")
+            req.Write("%s\r\n", resp)
+        }
 	case 'x':
 		req.SetHeader("Content-Type", "application/xml")
 		resp, err := xml.MarshalIndent(geoip, " ", " ")
