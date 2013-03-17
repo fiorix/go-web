@@ -80,7 +80,7 @@ func SSEHandler(req web.RequestHandler) {
 	if startFrame != "" {
 		sf, _ = strconv.Atoi(startFrame)
 	}
-	if sf >= cap(frames) {
+	if sf < 0 || sf >= cap(frames) {
 		sf = 0
 	}
 	conn, bufrw, err := req.ServeEvents()
