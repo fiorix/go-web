@@ -70,7 +70,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 	} else {
 		addrs, err := net.LookupHost(addr)
 		if err != nil {
-			req.HTTPError(400, err)
+			req.HTTPError(400, err.Error())
 			return
 		}
 		addr = addrs[0]
@@ -110,7 +110,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 
 		stmt, err := db.Prepare(q)
 		if err != nil {
-			req.HTTPError(404, err)
+			req.HTTPError(404, err.Error())
 			return
 		}
 
@@ -131,7 +131,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 			&geoip.MetroCode,
 			&geoip.AreaCode)
 		if err != nil {
-			req.HTTPError(500, err)
+			req.HTTPError(500, err.Error())
 			return
 		}
 	}
@@ -150,7 +150,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 	case 'j':
 		resp, err := json.Marshal(geoip)
 		if err != nil {
-			req.HTTPError(500, err)
+			req.HTTPError(500, err.Error())
 			return
 		}
         callback := req.HTTP.URL.Query().Get("callback")
@@ -165,7 +165,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 		req.SetHeader("Content-Type", "application/xml")
 		resp, err := xml.MarshalIndent(geoip, " ", " ")
 		if err != nil {
-			req.HTTPError(500, err)
+			req.HTTPError(500, err.Error())
 			return
 		}
 		req.Write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+
@@ -186,7 +186,7 @@ func checkQuota(mc *memcache.Client, db *sql.DB,
 		}
 
 		if err != nil {
-			req.HTTPError(503, err)
+			req.HTTPError(503, err.Error())
 			return
 		}
 
@@ -195,7 +195,7 @@ func checkQuota(mc *memcache.Client, db *sql.DB,
 			if count < maxRequestsPerIP {
 				mc.Increment(k, 1)
 			} else {
-				req.HTTPError(403)
+				req.HTTPError(403, "")
 				return
 			}
 		}

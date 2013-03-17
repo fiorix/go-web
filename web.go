@@ -27,7 +27,7 @@ type RequestHandler struct {
 }
 
 func (req *RequestHandler) HTTPError(n int, f string, a ...interface{}) {
-	if a != nil && req.Server.settings.Debug {
+	if f != "" && req.Server.settings.Debug {
 		log.Printf(f, a...)
 	}
 	http.Error(req.Writer, http.StatusText(n), n)
