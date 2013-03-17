@@ -5,6 +5,7 @@
 package web
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"html/template"
@@ -25,9 +26,9 @@ type RequestHandler struct {
 	Vars []string
 }
 
-func (req *RequestHandler) HTTPError(n int, e ...error) {
-	if e != nil && req.Server.settings.Debug {
-		log.Printf("HTTPError %d: %s", n, e[0])  // whine
+func (req *RequestHandler) HTTPError(n int, f string, a ...interface{}) {
+	if a != nil && req.Server.settings.Debug {
+		log.Printf(f, a...)
 	}
 	http.Error(req.Writer, http.StatusText(n), n)
 }
@@ -62,6 +63,48 @@ func (req *RequestHandler) ServeFile(name string) {
 
 func (req *RequestHandler) SetHeader(k string, v string) {
 	req.Writer.Header().Set(k, v)
+}
+
+type MessageEvent struct {
+	Event string
+	Data string
+	Id string
+	Retry int
+}
+
+func (req *RequestHandler) SendEvent(bufrw *bufio.ReadWriter, m *MessageEvent) error {
+	if m.Data != "" {
+		fmt.Fprintf(bufrw, "data: %s\n", m.Data)
+	}
+	if m.Event != "" {
+		fmt.Fprintf(bufrw, "event: %s\n", m.Event)
+	}
+	if m.Id != "" {
+		fmt.Fprintf(bufrw, "id: %s\n", m.Id)
+	}
+	if m.Retry >= 1{
+		fmt.Fprintf(bufrw, "retry: %d\n", m.Retry)
+	}
+	fmt.Fprintf(bufrw, "\n")
+	return bufrw.Flush()
+}
+
+var NoHijack = errors.New("webserver doesn't support hijacking")
+func (req *RequestHandler) ServeEvents() (net.Conn, *bufio.ReadWriter, error) {
+	hj, ok := req.Writer.(http.Hijacker)
+	if !ok {
+		return nil, nil, NoHijack
+	}
+	conn, bufrw, err := hj.Hijack()
+	if err == nil {
+		fmt.Fprintf(bufrw,
+			"HTTP/1.1 200 OK\r\n"+
+			"Cache-Control: no-cache\r\n"+
+			"Connection: keep-alive\r\n"+
+			"Content-Type: text/event-stream\r\n\r\n")
+		bufrw.Flush()
+	}
+	return conn, bufrw, err
 }
 
 func (req *RequestHandler) Write(f string, a ...interface{}) (int, error) {
@@ -125,7 +168,11 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, p := range srv.routes {
 		vars := p.re.FindStringSubmatch(r.URL.Path)
 		if len(vars) >= 1 {
-			execute(p.fn, RequestHandler{w, r, srv, vars})
+			execute(p.fn, RequestHandler{
+					Writer: w,
+					HTTP: r,
+					Server: srv,
+					Vars: vars})
 			return
 		}
 	}
