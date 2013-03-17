@@ -200,7 +200,7 @@ func checkQuota(mc *memcache.Client, db *sql.DB,
 
 // This is just for backwards compatibility with freegeoip.net
 func IndexHandler(req web.RequestHandler) {
-	req.Redirect("/static/index.html")
+	req.Redirect("/static/")
 }
 
 var static_re = regexp.MustCompile("..[/\\\\]")  // gtfo
@@ -226,6 +226,8 @@ func main() {
 		{"^/(crossdomain.xml)$", StaticHandler},
 		{"^/(csv|json|xml)/(.*)$", checkQuota(mc, db, LookupHandler)},
 	}
-	web.Application(":8080", handlers,
-			&web.Settings{Debug:true, XHeaders:false})
+	addr := ":8080"
+	//addr := "unix:/tmp/freegeoip"
+	web.Application(addr, handlers,
+			&web.Settings{Debug:true, XHeaders:true})
 }

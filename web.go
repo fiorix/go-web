@@ -8,10 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"net"
 	"net/http"
 	"path/filepath"
 	"log"
 	"regexp"
+	"strings"
+	"syscall"
 	"time"
 )
 
@@ -22,9 +25,9 @@ type RequestHandler struct {
 	Vars []string
 }
 
-func (req *RequestHandler) HTTPError(n int, err ...error) {
-	if err != nil && req.Server.settings.Debug {
-		log.Printf("HTTPError %d: %s", n, err[0])  // whine
+func (req *RequestHandler) HTTPError(n int, e ...error) {
+	if e != nil && req.Server.settings.Debug {
+		log.Printf("HTTPError %d: %s", n, e[0])  // whine
 	}
 	http.Error(req.Writer, http.StatusText(n), n)
 }
@@ -107,11 +110,14 @@ func execute(fn func(RequestHandler), req RequestHandler) {
 	}
 	fn(req)  // execute the HandlerFunc
 	if req.Server.settings.Debug {
+		ra := req.HTTP.RemoteAddr
+		if ra == "" {
+			ra = "unix"
+		}
 		log.Printf("%s %s (%s) %s",
 				req.HTTP.Method,
 				req.HTTP.URL.Path,
-				req.HTTP.RemoteAddr,
-				time.Since(now))
+				ra, time.Since(now))
 	}
 }
 
@@ -124,6 +130,24 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.NotFound(w, r)
+}
+
+// Support for unix sockets
+func ListenAndServe(srv *http.Server) (net.Listener, error) {
+	// code from http://golang.org/src/pkg/net/http/server.go
+	addr := srv.Addr
+	if addr == "" {
+		addr = ":http"
+	}
+	var proto string
+	if strings.HasPrefix(addr, "unix:") {
+		proto = "unix"
+		addr = addr[5:]  // len("unix:")
+		syscall.Unlink(addr)
+	} else {
+		proto = "tcp"
+	}
+	return net.Listen(proto, addr)
 }
 
 func Application(addr string, h []Handler, s *Settings) (*Server, error) {
@@ -147,12 +171,17 @@ func Application(addr string, h []Handler, s *Settings) (*Server, error) {
 	if s.WriteTimeout >= 1 {
 		wtimeout = s.WriteTimeout
 	}
-	srv := Server{r, s, t}
-	x := &http.Server{Addr: addr, Handler: &srv,
+	ws := Server{r, s, t}
+	srv := &http.Server{Addr: addr, Handler: &ws,
 				ReadTimeout: rtimeout, WriteTimeout:wtimeout}
-	err := x.ListenAndServe()
-	if err != nil && s.Debug {
-		log.Println("Error:", err)
+	// e := srv.ListenAndServe()
+	l, e := ListenAndServe(srv)
+	if e != nil {
+		if s.Debug {
+			log.Println("Error:", e)
+		}
+		return nil, e
 	}
-	return &srv, err
+
+	return &ws, srv.Serve(l)
 }
