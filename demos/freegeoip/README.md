@@ -1,7 +1,7 @@
 freegeoip.net web server
 ========================
 
-This is the current web server of [freegeoip.net][], a public HTTP API for
+This is the current web server of freegeoip.net, a public HTTP API for
 searching [Geolocation](http://en.wikipedia.org/wiki/Geolocation) of IP
 addresses.
 
@@ -10,9 +10,10 @@ It is the result of a research project that started in 2009 using
 A year later it moved to its own server infrastructure, built on the
 [cyclone](http://cyclone.io) web framework and backed by pypy.
 
-It's been rewritten in Go using [go-web][], another experimental web
-anti-framework similar to web.py, tornado and cyclone. It's a tool to avoid
-repeating the same code over and over on web applications.
+It's been rewritten in Go using [go-web](https://github.com/nuswit/go-web),
+another experimental web anti-framework similar to web.py, tornado and
+cyclone. It's a tool to speed up the development and avoid repeating the same
+code over and over on web applications.
 
 Database
 --------
@@ -61,6 +62,12 @@ If the server is listening on unix sockets, use *nc* to test:
 
 	echo -ne 'GET /json/ HTTP/1.0\r\nX-Real-IP: pwnz\r\n\r\n' | nc -U /tmp/freegeoip
 
+Credits
+-------
 
-[freegeoip.net] http://freegeoip.net
-[go-web] https://github.com/nuswit/go-web
+Thanks to (in no particular order):
+
+- google.com: Because it wouldn't look so good without the map
+- twitter.com: Bootstrap makes dirty programmers feel like artists
+- ipinfodb.com: For providing both GeoIP and Timezones database (2010 and 2011)
+- maxmind.com: For the current DB
