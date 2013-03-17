@@ -38,7 +38,7 @@ func loadPage(title string) (*Page, error) {
 func IndexHandler(req web.RequestHandler) {
 	files, err := filepath.Glob(filepath.Join(pagesDir, "*.txt"))
 	if err != nil {
-		req.HTTPError(500, err)
+		req.HTTPError(500, err.Error())
 		return
 	}
 
@@ -76,7 +76,7 @@ func saveHandler(req web.RequestHandler) {
 	p := &Page{Title: title, Body: []byte(body)}
 	err := p.save()
 	if err != nil {
-		req.HTTPError(500, err)
+		req.HTTPError(500, err.Error())
 		return
 	}
 	req.Redirect("/view/"+title)
