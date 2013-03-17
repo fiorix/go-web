@@ -62,6 +62,14 @@ If the server is listening on unix sockets, use *nc* to test:
 
 	echo -ne 'GET /json/ HTTP/1.0\r\nX-Real-IP: pwnz\r\n\r\n' | nc -U /tmp/freegeoip
 
+Command line
+------------
+
+To query the API from the command line, add this to *~/.bash_profile*:
+
+	function geoip_curl_xml { curl -D - http://freegeoip.net/xml/$1; }
+	alias geoip=geoip_curl_xml
+
 Credits
 -------
 
