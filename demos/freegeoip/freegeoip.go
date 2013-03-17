@@ -23,7 +23,7 @@ import (
 
 // API limits
 const (
-	maxRequestsPerIP = 2000
+	maxRequestsPerIP = 4000
 	expirySeconds = 3600
 )
 
