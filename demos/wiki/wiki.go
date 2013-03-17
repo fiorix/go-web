@@ -5,7 +5,7 @@
 package main
 
 import (
-	"github.com/fiorix/go-web"
+	"github.com/nuswit/go-web"
 	"io/ioutil"
 	"path/filepath"
 )
