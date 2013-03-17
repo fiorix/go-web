@@ -107,11 +107,11 @@ func execute(fn func(RequestHandler), req RequestHandler) {
 	}
 	fn(req)  // execute the HandlerFunc
 	if req.Server.settings.Debug {
-		log.Printf("%s %s (%s) %dµs",
+		log.Printf("%s %s (%s) %s",
 				req.HTTP.Method,
 				req.HTTP.URL.Path,
 				req.HTTP.RemoteAddr,
-				time.Since(now)/time.Microsecond)
+				time.Since(now))
 	}
 }
 
