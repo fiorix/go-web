@@ -61,13 +61,8 @@ func (req *RequestHandler) SetHeader(k string, v string) {
 	req.Writer.Header().Set(k, v)
 }
 
-func (req *RequestHandler) Write(f string, a ...interface{}) (n int, err error) {
-	if a != nil {
-		n, err = fmt.Fprintf(req.Writer, f, a...)
-	} else {
-		n, err = fmt.Fprintf(req.Writer, f)
-	}
-	return
+func (req *RequestHandler) Write(f string, a ...interface{}) (int, error) {
+	return fmt.Fprintf(req.Writer, f, a...)
 }
 
 type HandlerFunc func(req RequestHandler)
@@ -83,9 +78,10 @@ type route struct {
 
 type Settings struct {
 	Debug bool
-	ReadTimeout time.Duration
-	TemplatePath string
 	XHeaders bool
+	TemplatePath string
+	ReadTimeout time.Duration
+	WriteTimeout time.Duration
 }
 
 type Server struct {
@@ -143,12 +139,17 @@ func Application(addr string, h []Handler, s *Settings) (*Server, error) {
 	if s.Debug {
 		log.Println("Starting server on", addr)
 	}
-	timeout := 0*time.Second  // Keep-alive might be your enemy here
+	rtimeout := 0*time.Second  // Keep-alive might be your enemy here
 	if s.ReadTimeout >= 1 {
-		timeout = s.ReadTimeout
+		rtimeout = s.ReadTimeout
+	}
+	wtimeout := 0*time.Second
+	if s.WriteTimeout >= 1 {
+		wtimeout = s.WriteTimeout
 	}
 	srv := Server{r, s, t}
-	x := &http.Server{Addr: addr, Handler: &srv, ReadTimeout: timeout}
+	x := &http.Server{Addr: addr, Handler: &srv,
+				ReadTimeout: rtimeout, WriteTimeout:wtimeout}
 	err := x.ListenAndServe()
 	if err != nil && s.Debug {
 		log.Println("Error:", err)
