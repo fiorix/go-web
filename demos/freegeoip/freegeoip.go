@@ -153,14 +153,14 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 			req.HTTPError(500, err.Error())
 			return
 		}
-        callback := req.HTTP.URL.Query().Get("callback")
-        if callback != "" {
-            req.SetHeader("Content-Type", "text/javascript")
-            req.Write("%s(%s);\r\n", callback, resp)
-        } else {
-            req.SetHeader("Content-Type", "application/json")
-            req.Write("%s\r\n", resp)
-        }
+		callback := req.HTTP.FormValue("callback")
+		if callback != "" {
+			req.SetHeader("Content-Type", "text/javascript")
+			req.Write("%s(%s);\r\n", callback, resp)
+		} else {
+			req.SetHeader("Content-Type", "application/json")
+			req.Write("%s\r\n", resp)
+		}
 	case 'x':
 		req.SetHeader("Content-Type", "application/xml")
 		resp, err := xml.MarshalIndent(geoip, " ", " ")
