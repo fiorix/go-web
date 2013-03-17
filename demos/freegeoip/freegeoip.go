@@ -110,7 +110,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 
 		stmt, err := db.Prepare(q)
 		if err != nil {
-			req.HTTPError(500, err)
+			req.HTTPError(404, err)
 			return
 		}
 
