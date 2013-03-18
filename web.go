@@ -24,9 +24,9 @@ import (
 // This is used to interact with the HTTP request and response, render
 // templates, serve events (SSE), etc.
 //
-// func IndexHandler(req web.RequestHandler) {
-//   ...
-// }
+//    func IndexHandler(req web.RequestHandler) {
+//      ...
+//    }
 type RequestHandler struct {
 	// The response writer, used to set headers and write data
 	// back to the client.
@@ -63,14 +63,14 @@ func (req *RequestHandler) Redirect(url string) {
 // Renders the template "t" and writes the result to the client.
 // Example:
 //
-// func IndexHandler(req web.RequestHandler) {
-//   req.Render("index.html", map[string]interface{}{"foo": "bar"})
-// }
+//   func IndexHandler(req web.RequestHandler) {
+//     req.Render("index.html", map[string]interface{}{"foo": "bar"})
+//   }
 //
-// func main() {
-//   web.Application(":8080", []web.Handler{{"^/$", IndexHandler}},
-//                   &web.Settings{Debug:true, Template_path:"./templates"})
-// }
+//   func main() {
+//     web.Application(":8080", []web.Handler{{"^/$", IndexHandler}},
+//                     &web.Settings{Debug:true, Template_path:"./templates"})
+//   }
 //
 // If "Template_path" is not provided during initialization, the first call to
 // "Render" panics. (just like you)
@@ -108,17 +108,17 @@ func (req *RequestHandler) SetHeader(k string, v string) {
 // messages the server must be in events mode, by calling req.ServeEvents().
 // Example:
 //
-// func IndexHandler(req web.RequestHandler) {
-//   conn, bufrw, err := req.ServeEvents()
-//   if err != nil {
-//     return
-//   }
-//   defer conn.Close()
-//   for {
-//     req.SendEvent(bufrw, &web.MessageEvent{Id:"foo", Data:"bar"})
-//     ...
-//   }
-// }
+//    func IndexHandler(req web.RequestHandler) {
+//       conn, bufrw, err := req.ServeEvents()
+//       if err != nil {
+//         return
+//       }
+//       defer conn.Close()
+//       for {
+//         req.SendEvent(bufrw, &web.MessageEvent{Id:"foo", Data:"bar"})
+//         ...
+//       }
+//     }
 type MessageEvent struct {
 	Event string
 	Data string
@@ -179,10 +179,10 @@ type HandlerFunc func(req RequestHandler)
 // Maps URI patterns to request handler (HandlerFunc) functions.
 // Example:
 //
-// handlers := []web.Handler{
-//   {"^/$": IndexHandler},
-//   {"^/(a|b|c)/$": AbcHandler},
-// }
+//    handlers := []web.Handler{
+//      {"^/$": IndexHandler},
+//      {"^/(a|b|c)/$": AbcHandler},
+//    }
 type Handler struct {
 	Re string  // Regexp for the URL. e.g.: ^/index.html$
 	Fn HandlerFunc  // Handler function.
@@ -196,7 +196,7 @@ type route struct {
 // Settings used to initialize the server.
 // Example:
 //
-// web.Application(":8080", handlers, &web.Settings{Debug:false, XHeaders:true})
+//    web.Application(":8080", handlers, &web.Settings{Debug:false, XHeaders:true})
 type Settings struct {
 	Debug bool  // Makes the entire server very noisy when set to true
 	XHeaders bool  // Uses X-Real-IP or X-Forwarded-For HTTP headers when available
@@ -279,14 +279,14 @@ func ListenAndServe(srv *http.Server) (net.Listener, error) {
 // Starts the application.
 // Example:
 //
-// func IndexHandler(req web.RequestHandler) {
-//   req.Write("Hello, world")
-// }
+//    func IndexHandler(req web.RequestHandler) {
+//      req.Write("Hello, world")
+//    }
 //
-// func main() {
-//   web.Application(":8080", []web.Handler{{"^/$", IndexHandler}},
-//                   &web.Settings{Debug:true})
-// }
+//    func main() {
+//      web.Application(":8080", []web.Handler{{"^/$", IndexHandler}},
+//                      &web.Settings{Debug:true})
+//    }
 func Application(addr string, h []Handler, s *Settings) (*Server, error) {
 	var t *template.Template
 	if s.TemplatePath != "" {
