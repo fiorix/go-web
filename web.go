@@ -34,6 +34,8 @@ type RequestHandler struct {
 
 	// Request information: Method, URL, etc
 	HTTP *http.Request
+
+	// Base server, settings, etc
 	Server *Server
 
 	// Result of the handlers's regexp executed on the URL:
