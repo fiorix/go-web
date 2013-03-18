@@ -75,10 +75,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 		}
 		addr = addrs[0]
 	}
-
 	IP := net.ParseIP(addr)
-	geoip := GeoIP{Ip: addr}
-
 	reserved := false
 	for _, net := range reservedIPs {
 		if net.Contains(IP) {
@@ -86,7 +83,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 			break
 		}
 	}
-
+	geoip := GeoIP{Ip: addr}
 	if reserved {
 		geoip.CountryCode = "RD"
 		geoip.CountryName = "Reserved"
@@ -107,15 +104,12 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 		"    city_location.region_code = region_names.region_code "+
 		"WHERE city_blocks.ip_start <= ? "+
 		"ORDER BY city_blocks.ip_start DESC LIMIT 1"
-
 		stmt, err := db.Prepare(q)
 		if err != nil {
 			req.HTTPError(404, err.Error())
 			return
 		}
-
 		defer stmt.Close()
-
 		var uintIP uint32
 		b := bytes.NewBuffer(IP.To4())
 		binary.Read(b, binary.BigEndian, &uintIP)
@@ -139,8 +133,8 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 	switch format[0] {
 	case 'c':
 		req.SetHeader("Content-Type", "application/csv")
-		req.Write("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""+
-			  "\"%s\",\"%0.4f\",\"%0.4f\",\"%s\",\"%s\"\r\n",
+		req.Write(`"%s","%s","%s","%s","%s","%s"`+
+			  `"%s","%0.4f","%0.4f","%s","%s"`+"\r\n",
 			  geoip.Ip,
 			  geoip.CountryCode, geoip.CountryName,
 			  geoip.RegionCode, geoip.RegionName,
@@ -168,7 +162,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 			req.HTTPError(500, err.Error())
 			return
 		}
-		req.Write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+
+		req.Write(`<?xml version="1.0" encoding="UTF-8"?>`+
 			  "%s\r\n", resp)
 	}
 }
