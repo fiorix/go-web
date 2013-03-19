@@ -35,7 +35,7 @@ func loadPage(title string) (*Page, error) {
 	return &Page{Title: title, Body: body}, nil
 }
 
-func IndexHandler(req web.RequestHandler) {
+func IndexHandler(req *web.RequestHandler) {
 	files, err := filepath.Glob(filepath.Join(pagesDir, "*.txt"))
 	if err != nil {
 		req.HTTPError(500, err.Error())
@@ -51,7 +51,7 @@ func IndexHandler(req web.RequestHandler) {
 	req.Render("index.html", map[string]interface{} {"Pages": pages})
 }
 
-func viewHandler(req web.RequestHandler) {
+func viewHandler(req *web.RequestHandler) {
 	title := req.Vars[1]
 	p, err := loadPage(title)
 	if err != nil {
@@ -61,7 +61,7 @@ func viewHandler(req web.RequestHandler) {
 	req.Render("view.html", p)
 }
 
-func editHandler(req web.RequestHandler) {
+func editHandler(req *web.RequestHandler) {
 	title := req.Vars[1]
 	p, err := loadPage(title)
 	if err != nil {
@@ -70,7 +70,7 @@ func editHandler(req web.RequestHandler) {
 	req.Render("edit.html", p)
 }
 
-func saveHandler(req web.RequestHandler) {
+func saveHandler(req *web.RequestHandler) {
 	title := req.Vars[1]
 	body := req.HTTP.FormValue("body")
 	p := &Page{Title: title, Body: []byte(body)}

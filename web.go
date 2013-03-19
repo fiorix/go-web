@@ -90,7 +90,6 @@ func (req *RequestHandler) Render(t string, a interface{}) error {
 		log.Println("req.Render(%s) failed.", t)
 		panic("TemplatePath not set in web.Settings")
 	}
-
 	err := req.Server.templates.ExecuteTemplate(req.Writer, t, a)
 	if err != nil && req.Server.Settings.Debug {
 		log.Println(err)
@@ -182,7 +181,7 @@ func (req *RequestHandler) Write(f string, a ...interface{}) (int, error) {
 	return fmt.Fprintf(req.Writer, f, a...)
 }
 
-type HandlerFunc func(req RequestHandler)
+type HandlerFunc func(req *RequestHandler)
 
 // Maps URI patterns to request handler (HandlerFunc) functions.
 // Example:
@@ -249,7 +248,7 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			req.Writer = w
 			req.Server = srv
 			// Execute this pattern's HandlerFunc
-			p.fn(req)
+			p.fn(&req)
 			if req.status == 0 {
 				req.status = 200
 			}
@@ -313,7 +312,7 @@ func Application(addr string, h []Handler, s *Settings) (*Server, error) {
 		r[n] = route{regexp.MustCompile(handler.Re), handler.Fn}
 	}
 	if s.Debug {
-		log.Println("Starting server on", addr)
+		log.Println("Starting web application on", addr)
 	}
 	rtimeout := 0*time.Second  // Keep-alive might be your enemy here
 	if s.ReadTimeout >= 1 {

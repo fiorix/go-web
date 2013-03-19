@@ -6,7 +6,7 @@ package main
 
 import "github.com/nuswit/go-web"
 
-func IndexHandler(req web.RequestHandler) {
+func IndexHandler(req *web.RequestHandler) {
 	req.Write("Hello, world")
 }
 

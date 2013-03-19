@@ -71,7 +71,7 @@ var reservedIPs = []net.IPNet{
 	{net.IPv4(255, 255, 255, 255),	net.IPv4Mask(255, 255, 255, 255)},
 }
 
-func Lookup(req web.RequestHandler, db *sql.DB) {
+func Lookup(req *web.RequestHandler, db *sql.DB) {
 	format, addr := req.Vars[1], req.Vars[2]
 	if addr == "" {
 		addr = strings.Split(req.HTTP.RemoteAddr, ":")[0]
@@ -180,7 +180,7 @@ func makeHandler() web.HandlerFunc {
 		panic(err)
 	}
 	mc := memcache.New(memcacheServer)
-	return func(req web.RequestHandler) {
+	return func(req *web.RequestHandler) {
 		req.SetHeader("Access-Control-Allow-Origin", "*")
 		k := strings.Split(req.HTTP.RemoteAddr, ":")[0]
 		// Check quota
@@ -207,12 +207,12 @@ func makeHandler() web.HandlerFunc {
 	}
 }
 
-func IndexHandler(req web.RequestHandler) {
+func IndexHandler(req *web.RequestHandler) {
 	req.ServeFile(filepath.Join(staticPath, "index.html"))
 }
 
 var static_re = regexp.MustCompile("..[/\\\\]")  // gtfo
-func StaticHandler(req web.RequestHandler) {
+func StaticHandler(req *web.RequestHandler) {
 	filename := req.Vars[1]
 	if static_re.MatchString(filename) {
 		req.NotFound()

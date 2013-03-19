@@ -70,11 +70,11 @@ func loadMovie(filename string) error {
 	return nil
 }
 
-func IndexHandler(req web.RequestHandler) {
+func IndexHandler(req *web.RequestHandler) {
 	req.ServeFile("./index.html")
 }
 
-func SSEHandler(req web.RequestHandler) {
+func SSEHandler(req *web.RequestHandler) {
 	sf := 0
 	startFrame := req.HTTP.FormValue("startFrame")
 	if startFrame != "" {
