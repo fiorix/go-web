@@ -41,6 +41,9 @@ type RequestHandler struct {
 	// Result of the handlers's regexp executed on the URL:
 	// "^/(a|b|c)/$", IndexHandler...
 	Vars []string
+
+	// Response status (for log/debug only)
+	status int
 }
 
 // Returns an HTTP error to the client. The optional log message is only
@@ -49,16 +52,19 @@ func (req *RequestHandler) HTTPError(n int, f string, a ...interface{}) {
 	if f != "" && req.Server.Settings.Debug {
 		log.Printf(fmt.Sprintf("[%d] ", n) + f, a...)
 	}
+	req.status = n
 	http.Error(req.Writer, http.StatusText(n), n)
 }
 
 // Returns HTTP 404
 func (req *RequestHandler) NotFound() {
+	req.status = 404
 	http.NotFound(req.Writer, req.HTTP)
 }
 
 // Returns HTTP 302 and with Location header set to "url"
 func (req *RequestHandler) Redirect(url string) {
+	req.status = 302
 	http.Redirect(req.Writer, req.HTTP, url, http.StatusFound)
 }
 
@@ -215,49 +221,56 @@ type Server struct {
 	Settings *Settings
 }
 
-func execute(fn func(RequestHandler), req RequestHandler) {
-	var now time.Time
-	if req.Server.Settings.Debug {
-		now = time.Now()
+func checkIp(req *RequestHandler) {
+	addr := req.HTTP.Header.Get("X-Real-IP")
+	if addr == "" {
+		addr = req.HTTP.Header.Get("X-Forwarded-For")
 	}
-	if req.Server.Settings.XHeaders {
-		addr := req.HTTP.Header.Get("X-Real-IP")
-		if addr == "" {
-			addr = req.HTTP.Header.Get("X-Forwarded-For")
-		}
 
-		if addr != "" {
-			req.HTTP.RemoteAddr = addr
-		}
-	}
-	fn(req)  // execute the HandlerFunc
-	if req.Server.Settings.Debug {
-		ra := req.HTTP.RemoteAddr
-		if ra == "" {
-			ra = "unix"
-		}
-		log.Printf("%s %s (%s) %s",
-				req.HTTP.Method,
-				req.HTTP.URL.Path,
-				ra, time.Since(now))
+	if addr != "" {
+		req.HTTP.RemoteAddr = addr
 	}
 }
 
 // Executes a request handler. The handler is selected if its pattern regexp
 // match the URL.Path. HTTP 404 is returned otherwise.
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var now time.Time
+	req := RequestHandler{HTTP: r}
+	if srv.Settings.XHeaders {
+		checkIp(&req)
+	}
+	if srv.Settings.Debug {
+		now = time.Now()
+	}
 	for _, p := range srv.routes {
 		vars := p.re.FindStringSubmatch(r.URL.Path)
 		if len(vars) >= 1 {
-			execute(p.fn, RequestHandler{
-					Writer: w,
-					HTTP: r,
-					Server: srv,
-					Vars: vars})
-			return
+			req.Writer = w
+			req.Server = srv
+			// Execute this pattern's HandlerFunc
+			p.fn(req)
+			if req.status == 0 {
+				req.status = 200
+			}
+			break
 		}
 	}
-	http.NotFound(w, r)
+	if req.status < 1 {
+		req.status = 404
+		http.NotFound(w, r)
+	}
+	if srv.Settings.Debug {
+		ra := r.RemoteAddr
+		if ra == "" {
+			ra = "unix"
+		}
+		log.Printf("%d %s %s (%s) %s",
+				req.status,
+				r.Method,
+				r.URL.Path,
+				ra, time.Since(now))
+	}
 }
 
 // Listens on ip:port or unix:/filename.
