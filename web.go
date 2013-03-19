@@ -244,8 +244,8 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		now = time.Now()
 	}
 	for _, p := range srv.routes {
-		vars := p.re.FindStringSubmatch(r.URL.Path)
-		if len(vars) >= 1 {
+		req.Vars = p.re.FindStringSubmatch(r.URL.Path)
+		if len(req.Vars) >= 1 {
 			req.Writer = w
 			req.Server = srv
 			// Execute this pattern's HandlerFunc
