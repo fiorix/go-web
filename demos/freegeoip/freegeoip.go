@@ -11,20 +11,28 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
 	"github.com/nuswit/go-web"
+	"log"
 	"net"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
-// API limits
 const (
-	maxRequestsPerIP = 4000
-	expirySeconds = 3600
+	// API limits
+	maxRequestsPerIP	= 5000
+	expirySeconds		= 3600
+
+	// Server settings
+	debug			= true
+	listenOn		= ":8080"
+	memcacheServer		= "127.0.0.1:11211"
+	staticPath		= "./static"
+	databaseFile		= "./db/ipdb.sqlite"
 )
 
 type GeoIP struct {
@@ -63,14 +71,14 @@ var reservedIPs = []net.IPNet{
 	{net.IPv4(255, 255, 255, 255),	net.IPv4Mask(255, 255, 255, 255)},
 }
 
-func LookupHandler(req web.RequestHandler, db *sql.DB) {
+func Lookup(req web.RequestHandler, db *sql.DB) {
 	format, addr := req.Vars[1], req.Vars[2]
 	if addr == "" {
 		addr = strings.Split(req.HTTP.RemoteAddr, ":")[0]
 	} else {
 		addrs, err := net.LookupHost(addr)
 		if err != nil {
-			req.HTTPError(400, err.Error())
+			req.HTTPError(404, "")
 			return
 		}
 		addr = addrs[0]
@@ -106,7 +114,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 		"ORDER BY city_blocks.ip_start DESC LIMIT 1"
 		stmt, err := db.Prepare(q)
 		if err != nil {
-			req.HTTPError(404, err.Error())
+			req.HTTPError(500, "SQLite: %s", err.Error())
 			return
 		}
 		defer stmt.Close()
@@ -125,11 +133,10 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 			&geoip.MetroCode,
 			&geoip.AreaCode)
 		if err != nil {
-			req.HTTPError(500, err.Error())
+			req.HTTPError(404, "")
 			return
 		}
 	}
-
 	switch format[0] {
 	case 'c':
 		req.SetHeader("Content-Type", "application/csv")
@@ -144,7 +151,7 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 	case 'j':
 		resp, err := json.Marshal(geoip)
 		if err != nil {
-			req.HTTPError(500, err.Error())
+			req.HTTPError(500, "JSON Marshal: %s", err.Error())
 			return
 		}
 		callback := req.HTTP.FormValue("callback")
@@ -157,9 +164,9 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 		}
 	case 'x':
 		req.SetHeader("Content-Type", "application/xml")
-		resp, err := xml.MarshalIndent(geoip, " ", " ")
+		resp, err := xml.MarshalIndent(geoip, "", " ")
 		if err != nil {
-			req.HTTPError(500, err.Error())
+			req.HTTPError(500, "XML Marshal: %s", err.Error())
 			return
 		}
 		req.Write(`<?xml version="1.0" encoding="UTF-8"?>`+
@@ -167,23 +174,26 @@ func LookupHandler(req web.RequestHandler, db *sql.DB) {
 	}
 }
 
-func checkQuota(mc *memcache.Client, db *sql.DB,
-		fn func(web.RequestHandler, *sql.DB)) web.HandlerFunc {
+func makeHandler() web.HandlerFunc {
+	db, err := sql.Open("sqlite3", databaseFile)
+	if err != nil {
+		panic(err)
+	}
+	mc := memcache.New(memcacheServer)
 	return func(req web.RequestHandler) {
 		req.SetHeader("Access-Control-Allow-Origin", "*")
 		k := strings.Split(req.HTTP.RemoteAddr, ":")[0]
+		// Check quota
 		el, err := mc.Get(k)
 		if err == memcache.ErrCacheMiss {
 			err = mc.Set(&memcache.Item{
 					Key: k, Value: []byte("1"),
 					Expiration: expirySeconds})
 		}
-
 		if err != nil {
-			req.HTTPError(503, err.Error())
+			req.HTTPError(503, "memcache: %s", err.Error())
 			return
 		}
-
 		if el != nil {
 			count, _ := strconv.Atoi(string(el.Value))
 			if count < maxRequestsPerIP {
@@ -193,14 +203,12 @@ func checkQuota(mc *memcache.Client, db *sql.DB,
 				return
 			}
 		}
-
-		fn(req, db)  // do the lookup
+		Lookup(req, db)
 	}
 }
 
-// This is just for backwards compatibility with freegeoip.net
 func IndexHandler(req web.RequestHandler) {
-	req.Redirect("/static/")
+	req.ServeFile(filepath.Join(staticPath, "index.html"))
 }
 
 var static_re = regexp.MustCompile("..[/\\\\]")  // gtfo
@@ -210,24 +218,20 @@ func StaticHandler(req web.RequestHandler) {
 		req.NotFound()
 		return
 	}
-	req.ServeFile(filepath.Join("./static", filename))
+	req.ServeFile(filepath.Join(staticPath, filename))
 }
 
 func main() {
-	db, err := sql.Open("sqlite3", "db/ipdb.sqlite")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	mc := memcache.New("127.0.0.1:11211")
 	handlers := []web.Handler{
 		{"^/$", IndexHandler},
 		{"^/static/(.*)$", StaticHandler},
 		{"^/(crossdomain.xml)$", StaticHandler},
-		{"^/(csv|json|xml)/(.*)$", checkQuota(mc, db, LookupHandler)},
+		{"^/(csv|json|xml)/(.*)$", makeHandler()},
 	}
-	addr := ":8080"
-	//addr := "unix:/tmp/freegeoip"
-	web.Application(addr, handlers,
-			&web.Settings{Debug:true, XHeaders:true})
+	settings := web.Settings{
+		Debug: debug,
+		ReadTimeout: 15*time.Second,
+	}
+	log.Println("FreeGeoIP server starting")
+	web.Application(listenOn, handlers, &settings)
 }

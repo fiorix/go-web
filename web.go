@@ -47,7 +47,7 @@ type RequestHandler struct {
 // printed when the server is in debug mode.
 func (req *RequestHandler) HTTPError(n int, f string, a ...interface{}) {
 	if f != "" && req.Server.Settings.Debug {
-		log.Printf(f, a...)
+		log.Printf(fmt.Sprintf("[%d] ", n) + f, a...)
 	}
 	http.Error(req.Writer, http.StatusText(n), n)
 }
