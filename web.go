@@ -257,13 +257,13 @@ func checkIp(req *RequestHandler) {
 // Executes a request handler. The handler is selected if its pattern regexp
 // match the URL.Path. HTTP 404 is returned otherwise.
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var now time.Time
+	var start time.Time
 	req := RequestHandler{HTTP: r}
 	if srv.Settings.XHeaders {
 		checkIp(&req)
 	}
 	if srv.Settings.Debug {
-		now = time.Now()
+		start = time.Now()
 	}
 	for _, p := range srv.routes {
 		req.Vars = p.re.FindStringSubmatch(r.URL.Path)
@@ -289,7 +289,7 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("%d %s %s (%s) %s :: %s",
 				req.status, r.Method, r.URL.Path, ra,
-				time.Since(now), req.errmsg)
+				time.Since(start), req.errmsg)
 	}
 }
 
