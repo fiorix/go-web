@@ -6,7 +6,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/nuswit/go-web"
+	"github.com/fiorix/go-web"
 	"time"
 )
 

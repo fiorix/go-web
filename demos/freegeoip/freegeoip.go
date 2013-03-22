@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/nuswit/go-web"
+	"github.com/fiorix/go-web"
 	"log"
 	"net"
 	"path/filepath"

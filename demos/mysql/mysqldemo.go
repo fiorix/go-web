@@ -13,7 +13,7 @@ import (
 	"database/sql"
 	_ "github.com/ziutek/mymysql/thrsafe"
 	_ "github.com/ziutek/mymysql/godrv"
-	"github.com/nuswit/go-web"
+	"github.com/fiorix/go-web"
 	"time"
 )
 

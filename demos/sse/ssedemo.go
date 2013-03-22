@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 //
-// This demo is live on http://cos.pe
+// This demo is live at http://cos.pe
 
 package main
 
@@ -10,7 +10,7 @@ import (
 	"bufio"
 	"compress/gzip"
 	"encoding/json"
-	"github.com/nuswit/go-web"
+	"github.com/fiorix/go-web"
 	"html"
 	"log"
 	"os"
