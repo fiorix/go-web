@@ -42,28 +42,45 @@ type RequestHandler struct {
 	// "^/(a|b|c)/$", IndexHandler...
 	Vars []string
 
-	// Response status (for log/debug only)
+	// Response status and error message (for log/debug only)
 	status int
+	errmsg string
 }
 
 // Returns an HTTP error to the client. The optional log message is only
 // printed when the server is in debug mode.
-func (req *RequestHandler) HTTPError(n int, f string, a ...interface{}) {
-	if f != "" && req.Server.Settings.Debug {
-		log.Printf(fmt.Sprintf("[%d] ", n) + f, a...)
+// Example: req.HTTPError(503, "db failed: %s", err.Error())
+func (req *RequestHandler) HTTPError(n int, a ...interface{}) {
+	if a != nil && req.Server.Settings.Debug {
+		req.errmsg = fmt.Sprintf(fmt.Sprintf("%s", a[0]), a[1:]...)
 	}
 	req.status = n
 	http.Error(req.Writer, http.StatusText(n), n)
 }
 
-// Returns HTTP 404
+// Returns HTTP 404 (Not Found)
 func (req *RequestHandler) NotFound() {
 	req.status = 404
 	http.NotFound(req.Writer, req.HTTP)
 }
 
+// Returns HTTP 405 (Method Not Allowed), with the "Allow" header listing
+// the available methods.
+func (req *RequestHandler) NotAllowed(allow []string) {
+	allowed := strings.Join(allow, ", ")
+	if req.Server.Settings.Debug {
+		req.errmsg = "Allow: " + allowed
+	}
+	req.status = 405
+	req.Writer.Header().Set("Allow", allowed)
+	http.Error(req.Writer, http.StatusText(req.status), req.status)
+}
+
 // Returns HTTP 302 and with Location header set to "url"
 func (req *RequestHandler) Redirect(url string) {
+	if req.Server.Settings.Debug {
+		req.errmsg = "Location: " + url
+	}
 	req.status = 302
 	http.Redirect(req.Writer, req.HTTP, url, http.StatusFound)
 }
@@ -111,8 +128,9 @@ func (req *RequestHandler) SetHeader(k string, v string) {
 // An event message. (named after the spec)
 // http://dev.w3.org/html5/eventsource/
 //
-// This is part of the Server-Sent Events implementation. Before sending
-// messages the server must be in events mode, by calling req.ServeEvents().
+// This is part of the Server-Sent Events implementation.
+// Before sending messages, the request handler must switch to events mode
+// by calling .ServeEvents().
 // Example:
 //
 //    func IndexHandler(req web.RequestHandler) {
@@ -156,9 +174,8 @@ var NoHijack = errors.New("webserver doesn't support hijacking")
 // Hijacks the HTTP client socket and returns it.
 // It gives up the control over the request, therefore methods like
 // .Write() and .SetHeader() no longer work. All other information like the
-// request headers remain intact in req.HTTP(.URL, .Header, etc).
-// Must be called only once, and puts the server in events mode - only
-// the current request.
+// request headers remain intact e.g.: .HTTP{URL, Header}, etc.
+// Must be called only once, because it switch the request to events mode.
 func (req *RequestHandler) ServeEvents() (net.Conn, *bufio.ReadWriter, error) {
 	hj, ok := req.Writer.(http.Hijacker)
 	if !ok {
@@ -190,6 +207,12 @@ type HandlerFunc func(req *RequestHandler)
 //      {"^/$": IndexHandler},
 //      {"^/(a|b|c)/$": AbcHandler},
 //    }
+//
+// Capturing groups like (a|b|c) are stored in the request's .Vars attribute:
+//
+//     func IndexHandler(req *web.RequestHandler) {
+//         fmt.Println(req.Vars)
+//     }
 type Handler struct {
 	Re string  // Regexp for the URL. e.g.: ^/index.html$
 	Fn HandlerFunc  // Handler function.
@@ -208,7 +231,7 @@ type Settings struct {
 	Debug bool  // Makes the entire server very noisy when set to true
 	XHeaders bool  // Uses X-Real-IP or X-Forwarded-For HTTP headers when available
 	TemplatePath string  // Initializes HTML templates in a directory
-	ReadTimeout time.Duration  // Get rid of non-active keep-alive clients
+	ReadTimeout time.Duration  // Kills inactive clients (usually on Keep-Alive)
 	WriteTimeout time.Duration
 }
 
@@ -249,7 +272,7 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			req.Server = srv
 			// Execute this pattern's HandlerFunc
 			p.fn(&req)
-			if req.status == 0 {
+			if req.status == 0 { // no news is...
 				req.status = 200
 			}
 			break
@@ -264,15 +287,15 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if ra == "" {
 			ra = "unix"
 		}
-		log.Printf("%d %s %s (%s) %s",
-				req.status,
-				r.Method,
-				r.URL.Path,
-				ra, time.Since(now))
+		log.Printf("%d %s %s (%s) %s :: %s",
+				req.status, r.Method, r.URL.Path, ra,
+				time.Since(now), req.errmsg)
 	}
 }
 
 // Listens on ip:port or unix:/filename.
+// Unix socket is useful if the server is reverse proxied by Nginx or other
+// frontend servers that can do it.
 func ListenAndServe(srv *http.Server) (net.Listener, error) {
 	// code from http://golang.org/src/pkg/net/http/server.go
 	addr := srv.Addr
