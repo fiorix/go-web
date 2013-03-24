@@ -81,6 +81,8 @@ Example:
 	mux.HandleFunc("^/(foo|bar)?$", FoobarHandler)
 	http.ListenAndServe(":8080", mux.DefaultServeMux)
 
+Handlers can access the capturing groups (e.g.: foo, bar) via *req.Vars*.
+
 Examples
 --------
 
