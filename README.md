@@ -66,18 +66,18 @@ of the request. Useful for analytics and logging purposes.
 Request also have a new field, *Vars*, to support regexp-based multiplexers.
 Request.Vars holds the result of the regexp pattern executed on URL.Path.
 
-See [mux/]() for details.
+See [mux/](mux/) for details.
 
 Server-Sent events
 ------------------
 
-The [sse/]() package provides a simple interface for Server-Sent events,
+The [sse/](sse/) package provides a simple interface for Server-Sent events,
 also known as push notifications.
 
 Regexp-based request multiplexer
 --------------------------------
 
-The [mux/]() package provides a regexp-based multiplexer to route requests
+The [mux/](mux/) package provides a regexp-based multiplexer to route requests
 to handlers.
 
 Example:
@@ -90,4 +90,4 @@ Handlers can access the capturing groups (e.g.: foo, bar) via *req.Vars*.
 Examples
 --------
 
-Check out the [examples]().
+Check out the [examples](examples/).
