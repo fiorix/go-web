@@ -21,7 +21,7 @@ Example:
 
 or:
 
-	http.ListenAndServe("unix:/path")
+	http.ListenAndServe("unix:/path", nil)
 
 Server can overwrite Request.RemoteAddr with the contents of X-Forwarded-For
 HTTP header, by setting XHeaders to true.
@@ -31,13 +31,17 @@ balancers:
 	server := http.Server{Addr: ":8080", XHeaders: true}
 
 Server can call a Logger function at the end of every request, by setting
-the Logger field to a logger function (an http.HandlerFunc):
+the Logger field while creating the server, or later
+(must be an http.HandlerFunc).
 
 Example:
 
 	func logger(w http.ResposeWriter, req *http.Request) {
-		log.Printf("HTTP %d %s (%s) :: %s", w.Status(), req.URL.Path,
-			req.RemoteAddr, time.Since(req.Created))
+		log.Printf("HTTP %d %s (%s) :: %s",
+			w.Status(),
+			req.URL.Path,
+			req.RemoteAddr,
+			time.Since(req.Created))
 	}
 
 	...
@@ -48,18 +52,18 @@ Example:
 http.ResponseWriter
 -------------------
 
-ResponseWriter interface can return the status code of the response, after it
-is written (after a call to Write or WriteHeader).
+ResponseWriter interface can return the status code of the response by calling
+the *Status* method, after it is written (after a call to Write/WriteHeader).
 
-Useful for analytics and logging purposes.
+Useful for analytics and logging purposes. See above.
 
 http.Request
 ------------
 
-Request now have a Created field, that represents the time of the creation
+Request now have a *Created* field, that represents the time of the creation
 of the request. Useful for analytics and logging purposes.
 
-Request also have a new field, Vars, to support regexp-based multiplexers.
+Request also have a new field, *Vars*, to support regexp-based multiplexers.
 Request.Vars holds the result of the regexp pattern executed on URL.Path.
 
 See [mux/]() for details.
@@ -67,11 +71,11 @@ See [mux/]() for details.
 Server-Sent events
 ------------------
 
-The [sse/]() package provides a clean and simple interface for Server-Sent events,
+The [sse/]() package provides a simple interface for Server-Sent events,
 also known as push notifications.
 
-Regexp-based multiplexer
-------------------------
+Regexp-based request multiplexer
+--------------------------------
 
 The [mux/]() package provides a regexp-based multiplexer to route requests
 to handlers.
