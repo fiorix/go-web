@@ -37,8 +37,9 @@ the Logger field while creating the server, or later
 Example:
 
 	func logger(w http.ResposeWriter, req *http.Request) {
-		log.Printf("HTTP %d %s (%s) :: %s",
+		log.Printf("HTTP %d %s %s (%s) :: %s",
 			w.Status(),
+			req.Method,
 			req.URL.Path,
 			req.RemoteAddr,
 			time.Since(req.Created))

@@ -80,8 +80,13 @@ func logger(w http.ResponseWriter, req *http.Request) {
 		extra = ":: SSE"
 		status = 200
 	}
-	log.Printf("HTTP %d %s (%s) :: %s %s", status, req.URL.Path,
-		req.RemoteAddr, time.Since(req.Created), extra)
+	log.Printf("HTTP %d %s %s (%s) :: %s %s",
+		w.Status(),
+		req.Method,
+		req.URL.Path,
+		req.RemoteAddr,
+		time.Since(req.Created),
+		extra)
 }
 
 func IndexHandler(w http.ResponseWriter, req *http.Request) {
