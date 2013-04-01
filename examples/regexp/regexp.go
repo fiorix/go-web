@@ -9,7 +9,7 @@ package main
 import (
 	"fmt"
 	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/mux"
+	"github.com/fiorix/go-web/remux"
 	"log"
 	"time"
 )
@@ -29,12 +29,12 @@ func IndexHandler(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	// Supports GET /, /foo and /bar
-	mux.HandleFunc("^/(foo|bar)?$", IndexHandler)
+	remux.HandleFunc("^/(foo|bar)?$", IndexHandler)
 
 	// Create and start the server
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: mux.DefaultServeMux,
+		Handler: remux.DefaultServeMux,
 		Logger:  logger,
 	}
 	server.ListenAndServe()

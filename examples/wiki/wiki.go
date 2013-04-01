@@ -6,7 +6,7 @@ package main
 
 import (
 	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/mux"
+	"github.com/fiorix/go-web/remux"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -110,13 +110,13 @@ func logger(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	title_re := "([a-zA-Z0-9]+)$"
-	mux.HandleFunc("^/$", IndexHandler)
-	mux.HandleFunc("^/view/"+title_re, viewHandler)
-	mux.HandleFunc("^/edit/"+title_re, editHandler)
-	mux.HandleFunc("^/save/"+title_re, saveHandler)
+	remux.HandleFunc("^/$", IndexHandler)
+	remux.HandleFunc("^/view/"+title_re, viewHandler)
+	remux.HandleFunc("^/edit/"+title_re, editHandler)
+	remux.HandleFunc("^/save/"+title_re, saveHandler)
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: mux.DefaultServeMux,
+		Handler: remux.DefaultServeMux,
 		Logger:  logger,
 	}
 	server.ListenAndServe()

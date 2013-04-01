@@ -1,4 +1,15 @@
-package mux
+// Copyright 2013 Alexandre Fiori
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+package remux
+
+import (
+	"github.com/fiorix/go-web/http"
+	"path"
+	"regexp"
+	"sync"
+)
 
 // ServeMux is an HTTP request multiplexer.
 // It matches the URL of each incoming request against a list of registered
@@ -6,7 +17,7 @@ package mux
 // most closely matches the URL.
 //
 // Patterns are regular expressions, like "^/$". On routing decision,
-// the first regex that match against URL.Path is executed.
+// the handler of the first regex that match against URL.Path is executed.
 //
 // The result of the execution of the regexp pattern on URL.Path is stored
 // in Request.Vars.
@@ -20,14 +31,6 @@ package mux
 // ServeMux also takes care of sanitizing the URL request path,
 // redirecting any request containing . or .. elements to an
 // equivalent .- and ..-free URL.
-
-import (
-	"github.com/fiorix/go-web/http"
-	"path"
-	"regexp"
-	"sync"
-)
-
 type ServeMux struct {
 	mu sync.RWMutex
 	m  map[*regexp.Regexp]muxEntry
