@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"github.com/fiorix/go-web/http"
 	_ "github.com/ziutek/mymysql/godrv"
-	_ "github.com/ziutek/mymysql/thrsafe"
 	"log"
 	"time"
 )
