@@ -67,7 +67,7 @@ of the request. Useful for analytics and logging purposes.
 Request also have a new field, *Vars*, to support regexp-based multiplexers.
 Request.Vars holds the result of the regexp pattern executed on URL.Path.
 
-See [mux/](mux/mux.go) for details.
+See [remux/](remux/remux.go) for details.
 
 Server-Sent events
 ------------------
@@ -78,13 +78,13 @@ also known as push notifications.
 Regexp-based request multiplexer
 --------------------------------
 
-The [mux/](mux/mux.go) package provides a regexp-based multiplexer to route requests
+The [remux/](remux/remux.go) package provides a regexp-based multiplexer to route requests
 to handlers.
 
 Example:
 
-	mux.HandleFunc("^/(foo|bar)?$", FoobarHandler)
-	http.ListenAndServe(":8080", mux.DefaultServeMux)
+	remux.HandleFunc("^/(foo|bar)?$", FoobarHandler)
+	http.ListenAndServe(":8080", remux.DefaultServeMux)
 
 Handlers can access the capturing groups (e.g.: foo, bar) via *req.Vars*.
 
