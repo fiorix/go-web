@@ -8,8 +8,9 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/fiorix/go-web/http"
 	"net"
+
+	"github.com/fiorix/go-web/http"
 )
 
 var ErrNoHijack = errors.New("Server does not support hijacking")
