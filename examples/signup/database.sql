@@ -1,6 +1,7 @@
 drop database if exists dummy;
 create database dummy;
 grant all privileges on dummy.* to 'foo'@'localhost' identified by 'bar';
+flush privileges;
 use dummy;
 
 create table User (
