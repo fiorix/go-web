@@ -8,7 +8,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"html/template"
 	"io"
 	"os"
@@ -65,7 +64,7 @@ func (t *Templates) Scan() error {
 func (t *Templates) parseTemplates(dir string) error {
 	// HTML
 	// TODO: reload files on demand
-	fmt.Println("Scanning", dir)
+	//fmt.Println("Scanning", dir)
 	files, err := filepath.Glob(filepath.Join(dir, "*.html"))
 	if err != nil {
 		return err
@@ -76,7 +75,7 @@ func (t *Templates) parseTemplates(dir string) error {
 		}
 		b := filepath.Join(dir, t.BaseFile)
 		k := name[len(t.BaseDir)+1:]
-		fmt.Println("Adding", k)
+		//fmt.Println("Adding", k)
 		v := template.Must(template.ParseFiles(b, name))
 		t.html_cache[k] = v
 	}
@@ -88,7 +87,7 @@ func (t *Templates) parseTemplates(dir string) error {
 	}
 	for _, name := range files {
 		k := name[len(t.BaseDir)+1:]
-		fmt.Println("Adding", k)
+		//fmt.Println("Adding", k)
 		v := text_template.Must(text_template.ParseFiles(name))
 		t.text_cache[k] = v
 	}
