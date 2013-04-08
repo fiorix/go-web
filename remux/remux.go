@@ -5,10 +5,11 @@
 package remux
 
 import (
-	"github.com/fiorix/go-web/http"
 	"path"
 	"regexp"
 	"sync"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // ServeMux is an HTTP request multiplexer.
