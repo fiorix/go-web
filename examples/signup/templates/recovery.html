@@ -1,0 +1,75 @@
+{{define "title"}}Account Recovery{{end}}
+
+{{define "header"}}
+<style>
+  body {
+    padding-top: 20px;
+    padding-bottom: 40px;
+    background-color: #f5f5f5;
+  }
+
+  .form-custom {
+    max-width: 300px;
+    padding: 19px 29px 29px;
+    margin: 0 auto 20px;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    -webkit-border-radius: 5px;
+       -moz-border-radius: 5px;
+            border-radius: 5px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+       -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  }
+  .form-custom .form-custom-heading,
+  .form-custom .checkbox {
+    margin-bottom: 10px;
+  }
+  .form-custom input[type="text"],
+  .form-custom input[type="password"] {
+    font-size: 16px;
+    height: auto;
+    margin-bottom: 15px;
+    padding: 7px 9px;
+  }
+</style>
+{{end}}
+
+{{define "page"}}
+<div class="masthead">
+  <ul class="nav nav-pills pull-right">
+    <li><a href="/">Home</a></li>
+    <li><a href="/signin">Sign in</a></li>
+  </ul>
+  <h3 class="muted">Example</h3>
+</div>
+
+<hr>
+
+<form class="form-custom" method="post">
+  <h2 class="form-custom-heading">Lost password?</h2>
+  <input type="text" class="input-block-level" placeholder="Email address" name="email" id="email" value="{{.Email}}">
+  {{if .ErrInvalidEmail}}
+  <div class="alert alert-error">Invalid email address.<a class="close" data-dismiss="alert">×</a></div>
+  {{else}}{{if .ErrConfirmation}}
+  <div class="alert alert-error">Awaiting confirmation, please check your inbox.<a class="close" data-dismiss="alert">×</a></div>
+  {{else}}{{if .ErrUnknownUser}}
+  <div class="alert alert-error">This email is not registered.<a class="close" data-dismiss="alert">×</a></div>
+  {{end}}{{end}}{{end}}
+  <button class="btn btn-large btn-success" type="submit">Send</button>
+</form>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function(){
+  $("#email").focus();
+  $("#email").keypress(function (e){
+    if (e.which == 13) {
+      $("form").submit();
+      return false;
+    }
+  });
+});
+</script>
+{{end}}

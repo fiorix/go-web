@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Server Debug="true" XHeaders="false" Addr=":8080">
+	<!-- SessionKey is the cookie secret:
+	     http://www.gorillatoolkit.org/pkg/sessions
+
+	     Run "server -keygen" to generate new key.
+	-->
+	<SessionKey>9d50e6eca145994201d7ad713562f0c0bd4f67745bee9914</SessionKey>
+
+	<!-- Assets directories -->
+	<StaticPath>./static</StaticPath>
+	<TemplatePath>./templates</TemplatePath>
+
+	<!-- Databases (MySQL and Redis are required)
+	     Use database.sql to set up MySQL.
+	     Redis client will always use DB 0 without password.
+	-->
+	<MySQL>unix:/tmp/mysql.sock*dummy/foo/bar</MySQL>
+	<Redis>127.0.0.1:6379</Redis>
+
+	<!-- Email server used for sign up and account recovery (lost passwd).
+	     It has been only tested with Gmail, and a Google Apps domain.
+	-->
+	<SMTP>
+		<Addr>smtp.gmail.com:587</Addr>
+		<From>noreply@mydomain.com</From>
+		<ReplyTo>info@mydomain.com</ReplyTo>
+		<PlainAuth>
+			<User>noreply@mydomain.com</User>
+			<Passwd>foobar</Passwd>
+			<Host>smtp.gmail.com</Host>
+		</PlainAuth>
+	</SMTP>
+</Server>
