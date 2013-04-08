@@ -6,8 +6,9 @@ package autogzip
 
 import (
 	"compress/gzip"
-	"github.com/fiorix/go-web/http"
 	"io/ioutil"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // GetPage gets pages using gzip encoding when possible.

@@ -8,9 +8,10 @@ package autogzip
 
 import (
 	"compress/gzip"
-	"github.com/fiorix/go-web/http"
 	"io"
 	"strings"
+
+	"github.com/fiorix/go-web/http"
 )
 
 type ResponseWriter struct {
