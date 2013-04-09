@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Debug must be turned off in production.
+     XHeaders might be used when this server is sitting behind a proxy,
+     and the X-Forwarded-For HTTP header must have the client's IP.
+     Addr can be ip:port, :port or unix:/path.
+-->
 <Server Debug="true" XHeaders="false" Addr=":8080">
 	<!-- SessionKey is the cookie secret:
 	     http://www.gorillatoolkit.org/pkg/sessions

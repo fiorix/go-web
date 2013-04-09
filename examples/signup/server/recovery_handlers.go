@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/sessions"
 )
 
 func RecoveryHandler(w http.ResponseWriter, r *http.Request) {
@@ -141,6 +142,7 @@ func RecoveryConfirmHandler(w http.ResponseWriter, r *http.Request) {
 		Redis.Del("recovery:"+q, "recovery:"+email)
 		// Create session and redirect to members area.
 		s, _ := Session.Get(r, "s")
+		s.Options = &sessions.Options{MaxAge: 0, Path: "/"}
 		s.Values["Id"] = u.Id
 		s.Save(r, w)
 		http.Redirect(w, r, "/main", 302)

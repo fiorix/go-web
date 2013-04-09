@@ -20,7 +20,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func StaticHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, staticFile(r.URL.Path[8:]))
+	if r.URL.Path[:7] == "/static" {
+		http.ServeFile(w, r, staticFile(r.URL.Path[7:]))
+	} else {
+		http.ServeFile(w, r, staticFile(r.URL.Path))
+	}
 }
 
 func SignInHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +57,9 @@ func SignInHandler(w http.ResponseWriter, r *http.Request) {
 		// Create session and redirect to members area
 		s, _ := Session.Get(r, "s")
 		s.Values["Id"] = u.Id
-		if remember != "on" {
+		if remember == "on" {
+			s.Options = &sessions.Options{Path: "/"}
+		} else {
 			s.Options = &sessions.Options{MaxAge: 0, Path: "/"}
 		}
 		s.Save(r, w)
@@ -67,7 +73,7 @@ func SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SignOutHandler(w http.ResponseWriter, r *http.Request, s *sessions.Session) {
+func SignOutHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{Name: "s", Path: "/", MaxAge: -1})
 	http.Redirect(w, r, "/", 302)
 }

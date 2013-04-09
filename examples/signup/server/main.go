@@ -55,12 +55,14 @@ func main() {
 	// Public handlers
 	http.HandleFunc("/", IndexHandler)
 	http.HandleFunc("/static/", StaticHandler)
+	http.HandleFunc("/legal.txt", StaticHandler)
+	http.HandleFunc("/favicon.ico", StaticHandler)
 	// Sign Up
 	http.HandleFunc("/signup/", unauthenticated(SignUpHandler))
 	http.HandleFunc("/signup/confirm/", SignUpConfirmHandler)
 	// Sign In and Out
 	http.HandleFunc("/signin/", unauthenticated(SignInHandler))
-	http.HandleFunc("/signout/", authenticated(SignOutHandler))
+	http.HandleFunc("/signout/", SignOutHandler)
 	// Lost password
 	http.HandleFunc("/recovery/", unauthenticated(RecoveryHandler))
 	http.HandleFunc("/recovery/confirm/", RecoveryConfirmHandler)
