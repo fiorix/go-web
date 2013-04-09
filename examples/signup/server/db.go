@@ -45,7 +45,7 @@ func UserExists(email string) (bool, error) {
 
 // TODO: cache
 func GetUser(email string) (*User, error) {
-	stmt, err := MySQL.Prepare("select * from User where Email=? limit 1")
+	stmt, err := MySQL.Prepare("select * from User where Email=?")
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func GetUser(email string) (*User, error) {
 
 // TODO: cache
 func GetUserById(id int) (*User, error) {
-	stmt, err := MySQL.Prepare("select * from User where Id=? limit 1")
+	stmt, err := MySQL.Prepare("select * from User where Id=?")
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func GetUserById(id int) (*User, error) {
 
 func GetUserWithPasswd(email, passwd string) (*User, error) {
 	stmt, err := MySQL.Prepare(`
-		select * from User where Email=? and Passwd=SHA1(?) limit 1
+		select * from User where Email=? and Passwd=SHA1(?)
 	`)
 	if err != nil {
 		return nil, err
