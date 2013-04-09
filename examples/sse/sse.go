@@ -10,13 +10,14 @@ import (
 	"bufio"
 	"compress/gzip"
 	"encoding/json"
-	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/sse"
 	"html"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/sse"
 )
 
 type Message struct {
@@ -73,7 +74,7 @@ func loadMovie(filename string) error {
 	return nil
 }
 
-func logger(w http.ResponseWriter, req *http.Request) {
+func logger(w http.ResponseWriter, r *http.Request) {
 	var extra string
 	status := w.Status() // w.Status() is 0 after ServeEvents is called.
 	if status == 0 {
@@ -81,21 +82,21 @@ func logger(w http.ResponseWriter, req *http.Request) {
 		status = 200
 	}
 	log.Printf("HTTP %d %s %s (%s) :: %s %s",
-		w.Status(),
-		req.Method,
-		req.URL.Path,
-		req.RemoteAddr,
-		time.Since(req.Created),
+		status,
+		r.Method,
+		r.URL.Path,
+		r.RemoteAddr,
+		time.Since(r.Created),
 		extra)
 }
 
-func IndexHandler(w http.ResponseWriter, req *http.Request) {
-	http.ServeFile(w, req, "./index.html")
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./index.html")
 }
 
-func SSEHandler(w http.ResponseWriter, req *http.Request) {
+func SSEHandler(w http.ResponseWriter, r *http.Request) {
 	sf := 0
-	startFrame := req.FormValue("startFrame")
+	startFrame := r.FormValue("startFrame")
 	if startFrame != "" {
 		sf, _ = strconv.Atoi(startFrame)
 	}
@@ -108,7 +109,7 @@ func SSEHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer conn.Close()
-	defer func() { logger(w, req) }()
+	defer func() { logger(w, r) }()
 	// Play the movie, frame by frame
 	for n, f := range frames[sf:] {
 		m := &sse.MessageEvent{Id: strconv.Itoa(n + 1), Data: f.Buf}

@@ -17,10 +17,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/fiorix/go-web/http"
 	"log"
 	"syscall"
 	"time"
+
+	"github.com/fiorix/go-web/http"
 )
 
 func logger(w http.ResponseWriter, req *http.Request) {

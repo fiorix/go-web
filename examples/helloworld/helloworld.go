@@ -8,10 +8,11 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/fiorix/go-web/http"
 )
 
-func IndexHandler(w http.ResponseWriter, req *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world")
 }
 

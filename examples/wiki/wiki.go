@@ -5,13 +5,14 @@
 package main
 
 import (
-	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/remux"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"path/filepath"
 	"time"
+
+	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/remux"
 )
 
 const (
@@ -50,7 +51,7 @@ func loadPage(title string) (*Page, error) {
 	return &Page{Title: title, Body: body}, nil
 }
 
-func IndexHandler(w http.ResponseWriter, req *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	files, err := filepath.Glob(filepath.Join(pagesDir, "*.txt"))
 	if err != nil {
 		log.Println(err.Error())
@@ -67,18 +68,18 @@ func IndexHandler(w http.ResponseWriter, req *http.Request) {
 	renderTemplate(w, "index.html", map[string]interface{}{"Pages": pages})
 }
 
-func viewHandler(w http.ResponseWriter, req *http.Request) {
-	title := req.Vars[0]
+func viewHandler(w http.ResponseWriter, r *http.Request) {
+	title := r.Vars[0]
 	p, err := loadPage(title)
 	if err != nil {
-		http.Redirect(w, req, "/edit/"+title, http.StatusFound)
+		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
 		return
 	}
 	renderTemplate(w, "view.html", p)
 }
 
-func editHandler(w http.ResponseWriter, req *http.Request) {
-	title := req.Vars[0]
+func editHandler(w http.ResponseWriter, r *http.Request) {
+	title := r.Vars[0]
 	p, err := loadPage(title)
 	if err != nil {
 		p = &Page{Title: title}
@@ -86,9 +87,9 @@ func editHandler(w http.ResponseWriter, req *http.Request) {
 	renderTemplate(w, "edit.html", p)
 }
 
-func saveHandler(w http.ResponseWriter, req *http.Request) {
-	title := req.Vars[0]
-	body := req.FormValue("body")
+func saveHandler(w http.ResponseWriter, r *http.Request) {
+	title := r.Vars[0]
+	body := r.FormValue("body")
 	p := &Page{Title: title, Body: []byte(body)}
 	err := p.save()
 	if err != nil {
@@ -96,16 +97,16 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
-	http.Redirect(w, req, "/view/"+title, http.StatusFound)
+	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
-func logger(w http.ResponseWriter, req *http.Request) {
+func logger(w http.ResponseWriter, r *http.Request) {
 	log.Printf("HTTP %d %s %s (%s) :: %s",
 		w.Status(),
-		req.Method,
-		req.URL.Path,
-		req.RemoteAddr,
-		time.Since(req.Created))
+		r.Method,
+		r.URL.Path,
+		r.RemoteAddr,
+		time.Since(r.Created))
 }
 
 func main() {

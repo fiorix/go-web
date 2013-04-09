@@ -12,10 +12,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/fiorix/go-web/http"
-	_ "github.com/ziutek/mymysql/godrv"
 	"log"
 	"time"
+
+	"github.com/fiorix/go-web/http"
+	_ "github.com/ziutek/mymysql/godrv"
 )
 
 var DB *sql.DB
@@ -26,7 +27,7 @@ type QueryResult struct {
 	now    time.Time
 }
 
-func IndexHandler(w http.ResponseWriter, req *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	rows, err := DB.Query(`select 1, "foobar", now()`)
 	if err != nil {
 		// Returns 503 (Service Unavailable) and logs the error

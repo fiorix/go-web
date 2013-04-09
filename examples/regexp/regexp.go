@@ -8,22 +8,23 @@ package main
 
 import (
 	"fmt"
-	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/remux"
 	"log"
 	"time"
+
+	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/remux"
 )
 
-func logger(w http.ResponseWriter, req *http.Request) {
+func logger(w http.ResponseWriter, r *http.Request) {
 	log.Printf("HTTP %d %s %s (%s) :: %s",
 		w.Status(),
-		req.Method,
-		req.URL.Path,
-		req.RemoteAddr,
-		time.Since(req.Created))
+		r.Method,
+		r.URL.Path,
+		r.RemoteAddr,
+		time.Since(r.Created))
 }
 
-func IndexHandler(w http.ResponseWriter, req *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world")
 }
 

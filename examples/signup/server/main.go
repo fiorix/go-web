@@ -88,10 +88,11 @@ func main() {
 	}
 }
 
-func logger(w http.ResponseWriter, req *http.Request) {
-	log.Printf("HTTP %d %s (%s) :: %s",
+func logger(w http.ResponseWriter, r *http.Request) {
+	log.Printf("HTTP %d %s %s (%s) :: %s",
 		w.Status(),
-		req.URL.Path,
-		req.RemoteAddr,
-		time.Since(req.Created))
+		r.Method,
+		r.URL.Path,
+		r.RemoteAddr,
+		time.Since(r.Created))
 }
