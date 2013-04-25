@@ -6,6 +6,7 @@ package autogzip
 
 import (
 	"compress/gzip"
+	"crypto/tls"
 	"io/ioutil"
 
 	"github.com/fiorix/go-web/http"
@@ -13,7 +14,10 @@ import (
 
 // GetPage gets pages using gzip encoding when possible.
 func GetPage(url string) ([]byte, error) {
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
