@@ -1,5 +1,5 @@
 drop database if exists dummy;
-create database dummy;
+create database dummy character set utf8 collate utf8_unicode_ci;
 grant all privileges on dummy.* to 'foo'@'localhost' identified by 'bar';
 use dummy;
 
