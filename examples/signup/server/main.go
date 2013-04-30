@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/fiorix/go-redis/redis"
@@ -19,6 +20,7 @@ import (
 )
 
 const VERSION = "1.0"
+const APPNAME = "Foobar"
 
 var Redis *redis.Client
 var MySQL *sql.DB
@@ -58,17 +60,17 @@ func main() {
 	http.HandleFunc("/legal.txt", StaticHandler)
 	http.HandleFunc("/favicon.ico", StaticHandler)
 	// Sign Up
-	http.HandleFunc("/signup/", unauthenticated(SignUpHandler))
+	http.HandleFunc("/signup/", https(unauthenticated(SignUpHandler)))
 	http.HandleFunc("/signup/confirm/", SignUpConfirmHandler)
 	// Sign In and Out
-	http.HandleFunc("/signin/", unauthenticated(SignInHandler))
+	http.HandleFunc("/signin/", https(unauthenticated(SignInHandler)))
 	http.HandleFunc("/signout/", SignOutHandler)
 	// Lost password
-	http.HandleFunc("/recovery/", unauthenticated(RecoveryHandler))
+	http.HandleFunc("/recovery/", https(unauthenticated(RecoveryHandler)))
 	http.HandleFunc("/recovery/confirm/", RecoveryConfirmHandler)
 	// Signed In handlers
 	http.HandleFunc("/main/", authenticated(MainHandler))
-	http.HandleFunc("/settings/", authenticated(SettingsHandler))
+	http.HandleFunc("/settings/", https(authenticated(SettingsHandler)))
 	// HTTP Server
 	server := http.Server{
 		Addr:     Config.Addr,
@@ -81,15 +83,37 @@ func main() {
 		label += "s"
 	}
 	runtime.GOMAXPROCS(numCPU)
-	log.Printf("AppServer %s starting on %s (%d %s)",
-		VERSION, Config.Addr, numCPU, label)
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatal(err)
+	log.Printf("%s v%s (%d %s)", APPNAME, VERSION, numCPU, label)
+	wg := &sync.WaitGroup{}
+	if Config.Addr != "" {
+		wg.Add(1)
+		log.Printf("Starting HTTP server on %s", Config.Addr)
+		go func() {
+			log.Fatal(server.ListenAndServe())
+			wg.Done()
+		}()
 	}
+	if Config.SSL.Addr != "" {
+		wg.Add(1)
+		log.Printf("Starting HTTPS server on %s", Config.SSL.Addr)
+		go func() {
+			https := server
+			https.Addr = Config.SSL.Addr
+			log.Fatal(https.ListenAndServeTLS(
+				Config.SSL.CertFile, Config.SSL.KeyFile))
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }
 
 func logger(w http.ResponseWriter, r *http.Request) {
-	log.Printf("HTTP %d %s %s (%s) :: %s",
+	var s string
+	if r.TLS != nil {
+		s = "S" // soz no ternary :/
+	}
+	log.Printf("HTTP%s %d %s %s (%s) :: %s",
+		s,
 		w.Status(),
 		r.Method,
 		r.URL.Path,

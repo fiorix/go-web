@@ -18,6 +18,12 @@ type ConfigData struct {
 	Addr     string `xml:",attr"`
 	XHeaders bool   `xml:",attr"`
 
+	SSL struct {
+		Addr     string `xml:",attr"`
+		CertFile string
+		KeyFile  string
+	}
+
 	// settings
 	SessionKey []byte
 
@@ -55,11 +61,16 @@ func ReadConfig(filename string) (*ConfigData, error) {
 	}
 	// Make StaticPath and TemplatePath relative to the config file's dir.
 	basedir := filepath.Dir(filename)
-	if cfg.StaticPath != "" && cfg.StaticPath[0] != '/' {
-		cfg.StaticPath = filepath.Join(basedir, cfg.StaticPath)
-	}
-	if cfg.TemplatePath != "" && cfg.TemplatePath[0] != '/' {
-		cfg.TemplatePath = filepath.Join(basedir, cfg.TemplatePath)
-	}
+	relativePath(basedir, &cfg.SSL.CertFile)
+	relativePath(basedir, &cfg.SSL.KeyFile)
+	relativePath(basedir, &cfg.StaticPath)
+	relativePath(basedir, &cfg.TemplatePath)
 	return cfg, nil
+}
+
+func relativePath(basedir string, path *string) {
+	p := *path
+	if p != "" && p[0] != '/' {
+		*path = filepath.Join(basedir, p)
+	}
 }

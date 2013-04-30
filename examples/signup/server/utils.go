@@ -5,9 +5,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/hex"
 	"log"
+	"net"
 	"net/smtp"
 	"os"
 	"path/filepath"
@@ -16,13 +16,36 @@ import (
 	"github.com/fiorix/go-web/sessions"
 )
 
-type AuthHandlerFunc func(http.ResponseWriter, *http.Request, *sessions.Session)
+// https is a wrapper for HandlerFunc functions that enforces HTTPS on GET.
+func https(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.TLS == nil && Config.SSL.Addr != "" && r.Method == "GET" {
+			url, _, _ := net.SplitHostPort(r.Host)
+			_, port, _ := net.SplitHostPort(Config.SSL.Addr)
+			if port != "" && port != "443" {
+				url += ":" + port
+			}
+			url += r.URL.Path
+			if r.URL.RawQuery != "" {
+				url += "?" + r.URL.RawQuery
+			}
+			http.Redirect(w, r, "https://"+url, 302)
+		} else {
+			fn(w, r)
+		}
+	}
+}
+
+type SessHandlerFunc func(http.ResponseWriter, *http.Request, *sessions.Session)
 
 // authenticated is a wrapper for HandlerFunc functions that automatically
 // checks the (cookie) session. If there's no session available then the
 // request is automatically redirected to /signin?next=current_url.
-func authenticated(fn AuthHandlerFunc) http.HandlerFunc {
+func authenticated(fn SessHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.TLS == nil && Config.SSL.Addr != "" {
+			http.Redirect(w, r, "https://", 302)
+		}
 		s, err := Session.Get(r, "s")
 		if s == nil || s.Values["Id"] == nil || err != nil {
 			http.Redirect(w, r, "/signin/?next="+r.URL.Path, 302)
@@ -74,22 +97,6 @@ func RandHex(nbytes int) string {
 		log.Fatal(err)
 	}
 	return hex.EncodeToString(bytes)
-}
-
-// renderTemplate renders a template or returns http 500 on failure.
-func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
-	if err := Tmpl.Render(w, name, data); err != nil {
-		httpError(w, 500, err)
-	}
-}
-
-// renderTemplateBytes renders a template and returns its bytes.
-func renderTemplateBytes(name string, data interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	if err := Tmpl.Render(&buf, name, data); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
 }
 
 // staticFile serves a static file under the StaticFile configuration entry.

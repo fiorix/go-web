@@ -7,12 +7,15 @@ package main
 // Wrapper for html and text templates.
 
 import (
+	"bytes"
 	"errors"
 	"html/template"
 	"io"
 	"os"
 	"path/filepath"
 	text_template "text/template"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // LoadTemplates pre-load all html files under dir, recursively.
@@ -76,6 +79,7 @@ func (t *Templates) parseTemplates(dir string) error {
 		b := filepath.Join(dir, t.BaseFile)
 		k := name[len(t.BaseDir)+1:]
 		//fmt.Println("Adding", k)
+		// TODO: add "eq" and "or" functions
 		v := template.Must(template.ParseFiles(b, name))
 		t.html_cache[k] = v
 	}
@@ -92,4 +96,20 @@ func (t *Templates) parseTemplates(dir string) error {
 		t.text_cache[k] = v
 	}
 	return nil
+}
+
+// renderTemplate renders a template or returns http 500 on failure.
+func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
+	if err := Tmpl.Render(w, name, data); err != nil {
+		httpError(w, 500, err)
+	}
+}
+
+// renderTemplateBytes renders a template and returns its bytes.
+func renderTemplateBytes(name string, data interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	if err := Tmpl.Render(&buf, name, data); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
