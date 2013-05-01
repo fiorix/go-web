@@ -11,8 +11,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,6 +20,9 @@ import (
 	"syscall"
 	"testing"
 	"time"
+
+	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/httptest"
 )
 
 func newRequest(httpreq string) *http.Request {

@@ -8,10 +8,11 @@ package httputil
 
 import (
 	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/httptest"
 )
 
 func TestReverseProxy(t *testing.T) {

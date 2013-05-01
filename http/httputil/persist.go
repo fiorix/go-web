@@ -11,9 +11,10 @@ import (
 	"errors"
 	"io"
 	"net"
-	"net/http"
 	"net/textproto"
 	"sync"
+
+	"github.com/fiorix/go-web/http"
 )
 
 var (

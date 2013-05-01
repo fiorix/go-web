@@ -57,6 +57,10 @@ func (ho headerOnlyResponseWriter) WriteHeader(int) {
 	panic("NOIMPL")
 }
 
+func (ho headerOnlyResponseWriter) Status() int {
+	panic("NOIMPL")
+}
+
 func TestSetCookie(t *testing.T) {
 	m := make(Header)
 	SetCookie(headerOnlyResponseWriter(m), &Cookie{Name: "cookie-1", Value: "one", Path: "/restricted/"})

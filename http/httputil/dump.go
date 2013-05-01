@@ -11,10 +11,11 @@ import (
 	"io"
 	"io/ioutil"
 	"net"
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // One of the copies, say from b to r2, could be avoided by using a more

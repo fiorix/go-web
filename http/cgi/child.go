@@ -15,11 +15,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // Request returns the HTTP request as represented in the current

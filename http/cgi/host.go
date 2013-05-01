@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,6 +26,8 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/fiorix/go-web/http"
 )
 
 var trailingPort = regexp.MustCompile(`:([0-9]+)$`)

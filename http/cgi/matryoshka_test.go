@@ -10,9 +10,10 @@ package cgi
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"testing"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // This test is a CGI host (testing host.go) that runs its own binary

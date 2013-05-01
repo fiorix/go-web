@@ -11,10 +11,11 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
-	"net/http/cgi"
 	"os"
 	"time"
+
+	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/cgi"
 )
 
 // request holds the state for an in-progress request. As soon as it's complete,

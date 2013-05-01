@@ -14,8 +14,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net"
-	. "net/http"
-	"net/http/httptest"
 	"net/url"
 	"os"
 	"runtime"
@@ -24,6 +22,9 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	. "github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/httptest"
 )
 
 // TODO: test 5 pipelined requests with responses: 1) OK, 2) OK, Connection: Close

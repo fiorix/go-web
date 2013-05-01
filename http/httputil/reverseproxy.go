@@ -10,11 +10,12 @@ import (
 	"io"
 	"log"
 	"net"
-	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // ReverseProxy is an HTTP Handler that takes an incoming request and

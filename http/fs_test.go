@@ -13,8 +13,6 @@ import (
 	"mime"
 	"mime/multipart"
 	"net"
-	. "net/http"
-	"net/http/httptest"
 	"net/url"
 	"os"
 	"os/exec"
@@ -25,6 +23,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	. "github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/httptest"
 )
 
 const (

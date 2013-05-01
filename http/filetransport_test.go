@@ -6,10 +6,11 @@ package http_test
 
 import (
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/fiorix/go-web/http"
 )
 
 func checker(t *testing.T) func(string, error) {

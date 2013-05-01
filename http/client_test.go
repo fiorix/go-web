@@ -14,13 +14,14 @@ import (
 	"io"
 	"io/ioutil"
 	"net"
-	. "net/http"
-	"net/http/httptest"
 	"net/url"
 	"strconv"
 	"strings"
 	"sync"
 	"testing"
+
+	. "github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/httptest"
 )
 
 var robotsTxtHandler = HandlerFunc(func(w ResponseWriter, r *Request) {

@@ -6,8 +6,9 @@ package httptest
 
 import (
 	"io/ioutil"
-	"net/http"
 	"testing"
+
+	"github.com/fiorix/go-web/http"
 )
 
 func TestServer(t *testing.T) {

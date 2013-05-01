@@ -11,14 +11,15 @@ import (
 	"io"
 	"io/ioutil"
 	"mime/multipart"
-	. "net/http"
-	"net/http/httptest"
 	"net/url"
 	"os"
 	"reflect"
 	"regexp"
 	"strings"
 	"testing"
+
+	. "github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/httptest"
 )
 
 func TestQuery(t *testing.T) {

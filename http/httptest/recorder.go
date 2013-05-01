@@ -7,7 +7,8 @@ package httptest
 
 import (
 	"bytes"
-	"net/http"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // ResponseRecorder is an implementation of http.ResponseWriter that
@@ -50,6 +51,11 @@ func (rw *ResponseRecorder) Write(buf []byte) (int, error) {
 // WriteHeader sets rw.Code.
 func (rw *ResponseRecorder) WriteHeader(code int) {
 	rw.Code = code
+}
+
+// Status returns the HTTP response status
+func (rw *ResponseRecorder) Status() int {
+	return rw.Code
 }
 
 // Flush sets rw.Flushed to true.

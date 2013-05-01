@@ -11,9 +11,10 @@ import (
 	"flag"
 	"fmt"
 	"net"
-	"net/http"
 	"os"
 	"sync"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // A Server is an HTTP server listening on a system-chosen port on the

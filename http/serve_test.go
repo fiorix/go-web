@@ -15,9 +15,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-	. "net/http"
-	"net/http/httptest"
-	"net/http/httputil"
 	"net/url"
 	"os"
 	"reflect"
@@ -25,6 +22,10 @@ import (
 	"syscall"
 	"testing"
 	"time"
+
+	. "github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/httptest"
+	"github.com/fiorix/go-web/http/httputil"
 )
 
 type dummyAddr string

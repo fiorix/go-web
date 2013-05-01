@@ -67,7 +67,7 @@ type ResponseWriter interface {
 	// send error codes.
 	WriteHeader(int)
 
-	// Status returns the status of the response, if there's one.
+	// Status returns the status code of the HTTP response, if there's one.
 	// It must be called after WriteHeader, otherwise returns zero.
 	Status() int
 }
@@ -1112,8 +1112,9 @@ func (srv *Server) Serve(l net.Listener) error {
 //
 //	import (
 //		"io"
-//		"net/http"
 //		"log"
+//
+//		"github.com/fiorix/go-web/http"
 //	)
 //
 //	// hello world, the web server
@@ -1143,7 +1144,8 @@ func ListenAndServe(addr string, handler Handler) error {
 //
 //	import (
 //		"log"
-//		"net/http"
+//
+//		"github.com/fiorix/go-web/http"
 //	)
 //
 //	func handler(w http.ResponseWriter, req *http.Request) {

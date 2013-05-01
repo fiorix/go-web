@@ -13,11 +13,12 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
 	"sync"
+
+	"github.com/fiorix/go-web/http"
 )
 
 // hello world, the web server

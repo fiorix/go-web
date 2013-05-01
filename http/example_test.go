@@ -8,7 +8,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
+
+	"github.com/fiorix/go-web/http"
 )
 
 func ExampleHijacker() {

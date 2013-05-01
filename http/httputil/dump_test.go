@@ -9,9 +9,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"net/url"
 	"testing"
+
+	"github.com/fiorix/go-web/http"
 )
 
 type dumpTest struct {

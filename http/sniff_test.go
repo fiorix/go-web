@@ -10,11 +10,12 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	. "net/http"
-	"net/http/httptest"
 	"strconv"
 	"strings"
 	"testing"
+
+	. "github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/http/httptest"
 )
 
 var sniffTests = []struct {
