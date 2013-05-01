@@ -1047,7 +1047,9 @@ func (srv *Server) ListenAndServe() error {
 	} else {
 		if strings.HasPrefix(addr, "unix:") {
 			proto = "unix"
-			addr = addr[5:] // len("unix:")
+			addr = addr[5:]
+		} else if strings.Contains(addr, "/") {
+			proto = "unix"
 		} else {
 			proto = "tcp"
 		}

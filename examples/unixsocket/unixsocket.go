@@ -46,8 +46,8 @@ func main() {
 
 	// Create and start the server
 	server := http.Server{
-		Addr:   "unix:./test.sock", // Listen on Unix Socket
-		Logger: logger,             // Logger to be called after every request
+		Addr:   "./test.sock", // Listen on Unix Socket
+		Logger: logger,        // Logger to be called after every request
 
 		// XHeaders make the server overwrite the remote IP address in
 		// http.Request.RemoteAddr with the contents of the X-Forwarded-For

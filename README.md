@@ -17,11 +17,11 @@ migration from existing set ups with Nginx.
 
 Example:
 
-	server := http.Server{Addr: "unix:/path"}
+	server := http.Server{Addr: "./test.sock"}
 
 or:
 
-	http.ListenAndServe("unix:/path", nil)
+	http.ListenAndServe("./test.sock", nil)
 
 Server can overwrite Request.RemoteAddr with the contents of X-Forwarded-For
 HTTP header, by setting XHeaders to true.
