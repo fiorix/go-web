@@ -9,13 +9,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"runtime"
 	"sync"
 	"time"
 
 	"github.com/fiorix/go-redis/redis"
-	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/sessions"
+	"github.com/fiorix/go-web/httpxtra"
+	"github.com/gorilla/sessions"
 	_ "github.com/ziutek/mymysql/godrv"
 )
 
@@ -71,11 +72,15 @@ func main() {
 	// Signed In handlers
 	http.HandleFunc("/main/", authenticated(MainHandler))
 	http.HandleFunc("/settings/", https(authenticated(SettingsHandler)))
-	// HTTP Server
-	server := http.Server{
-		Addr:     Config.Addr,
+	// Custom Handler
+	handler := httpxtra.Handler{
 		Logger:   logger,
 		XHeaders: Config.XHeaders,
+	}
+	// HTTP Server
+	server := http.Server{
+		Addr:    Config.Addr,
+		Handler: handler,
 	}
 	numCPU := runtime.NumCPU()
 	label := "CPU"
@@ -89,7 +94,8 @@ func main() {
 		wg.Add(1)
 		log.Printf("Starting HTTP server on %s", Config.Addr)
 		go func() {
-			log.Fatal(server.ListenAndServe())
+			// Use our listener to support Unix sockets.
+			log.Fatal(httpxtra.ListenAndServe(server))
 			wg.Done()
 		}()
 	}
@@ -99,6 +105,7 @@ func main() {
 		go func() {
 			https := server
 			https.Addr = Config.SSL.Addr
+			// No Unix sockets for HTTPS. duh!
 			log.Fatal(https.ListenAndServeTLS(
 				Config.SSL.CertFile, Config.SSL.KeyFile))
 			wg.Done()
@@ -107,16 +114,6 @@ func main() {
 	wg.Wait()
 }
 
-func logger(w http.ResponseWriter, r *http.Request) {
-	var s string
-	if r.TLS != nil {
-		s = "S" // soz no ternary :/
-	}
-	log.Printf("HTTP%s %d %s %s (%s) :: %s",
-		s,
-		w.Status(),
-		r.Method,
-		r.URL.Path,
-		r.RemoteAddr,
-		time.Since(r.Created))
+func logger(r *http.Request, created time.Time, status, bytes int) {
+	fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
 }

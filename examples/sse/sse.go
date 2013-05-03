@@ -10,15 +10,68 @@ import (
 	"bufio"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"html"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/httpxtra"
 	"github.com/fiorix/go-web/sse"
 )
+
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./index.html")
+}
+
+func SSEHandler(w http.ResponseWriter, r *http.Request) {
+	sf := 0
+	startFrame := r.FormValue("startFrame")
+	if startFrame != "" {
+		sf, _ = strconv.Atoi(startFrame)
+	}
+	if sf < 0 || sf >= cap(frames) {
+		sf = 0
+	}
+	conn, buf, err := sse.ServeEvents(w)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer conn.Close()
+	// Play the movie, frame by frame
+	for n, f := range frames[sf:] {
+		m := &sse.MessageEvent{Id: strconv.Itoa(n + 1), Data: f.Buf}
+		e := sse.SendEvent(buf, m)
+		if e != nil {
+			// usually a broken pipe error
+			// log.Println(e.Error())
+			break
+		}
+		time.Sleep(f.Time)
+	}
+}
+
+func main() {
+	err := loadMovie("./ASCIImation.txt.gz")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	http.HandleFunc("/", IndexHandler)
+	http.HandleFunc("/sse", SSEHandler)
+	server := http.Server{
+		Addr:    ":8080",
+		Handler: httpxtra.Handler{Logger: logger},
+	}
+	server.ListenAndServe()
+}
+
+func logger(r *http.Request, created time.Time, status, bytes int) {
+	fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
+}
 
 type Message struct {
 	FrameNo  int
@@ -72,65 +125,4 @@ func loadMovie(filename string) error {
 		lineno += 1
 	}
 	return nil
-}
-
-func logger(w http.ResponseWriter, r *http.Request) {
-	var extra string
-	status := w.Status() // w.Status() is 0 after ServeEvents is called.
-	if status == 0 {
-		extra = ":: SSE"
-		status = 200
-	}
-	log.Printf("HTTP %d %s %s (%s) :: %s %s",
-		status,
-		r.Method,
-		r.URL.Path,
-		r.RemoteAddr,
-		time.Since(r.Created),
-		extra)
-}
-
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./index.html")
-}
-
-func SSEHandler(w http.ResponseWriter, r *http.Request) {
-	sf := 0
-	startFrame := r.FormValue("startFrame")
-	if startFrame != "" {
-		sf, _ = strconv.Atoi(startFrame)
-	}
-	if sf < 0 || sf >= cap(frames) {
-		sf = 0
-	}
-	conn, buf, err := sse.ServeEvents(w)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer conn.Close()
-	defer func() { logger(w, r) }()
-	// Play the movie, frame by frame
-	for n, f := range frames[sf:] {
-		m := &sse.MessageEvent{Id: strconv.Itoa(n + 1), Data: f.Buf}
-		e := sse.SendEvent(buf, m)
-		if e != nil {
-			// usually a broken pipe error
-			// log.Println(e.Error())
-			break
-		}
-		time.Sleep(f.Time)
-	}
-}
-
-func main() {
-	err := loadMovie("./ASCIImation.txt.gz")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	http.HandleFunc("/", IndexHandler)
-	http.HandleFunc("/sse", SSEHandler)
-	server := http.Server{Addr: ":8080", Logger: logger}
-	server.ListenAndServe()
 }

@@ -2,36 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package main
-
-// unixsocket.go starts the HTTP server on a Unix socket instead of TCP.
-// Useful when the server is reverse proxied by Nginx or other servers.
-// Make sure the frontend server sets the X-Forwarded-For HTTP header with the
-// IP address of the client.
-// http.Server must be created manually, with the XHeaders option set to true.
+// unixsocket.go starts an HTTP server on a Unix socket instead of TCP port.
+//
+// This is useful when the server is reverse proxied by a frontend server or
+// a load balancer like Nginx.
+//
+// Make sure the frontend server sets either X-Real-IP or X-Forwarded-For HTTP
+// headers with the IP address of the client, and set XHeaders=true in our
+// custom httpxtra.Handler below.
+//
 // When XHeaders is set to true, it overwrites http.Request.RemoteAddr with
-// the contents of X-Forwarded-For HTTP header.
-// It does not validate the IP.
-// Test:
-// echo -ne 'GET / HTTP/1.1\r\nX-Forwarded-For: pwnz\r\n\r\n' | nc -U ./test.sock
+// the contents of either X-Real-IP or X-Forwarded-For HTTP header. The IP is
+// not validated.
+//
+// Test the server:
+// echo -ne 'GET / HTTP/1.1\r\nX-Real-IP: pwnz\r\n\r\n' | nc -U ./test.sock
+package main
 
 import (
 	"fmt"
-	"log"
+	"net/http"
 	"syscall"
 	"time"
 
-	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/httpxtra"
 )
-
-func logger(w http.ResponseWriter, req *http.Request) {
-	log.Printf("HTTP %d %s %s (%s) :: %s",
-		w.Status(),
-		req.Method,
-		req.URL.Path,
-		req.RemoteAddr,
-		time.Since(req.Created))
-}
 
 func IndexHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "Hello, world")
@@ -40,21 +35,28 @@ func IndexHandler(w http.ResponseWriter, req *http.Request) {
 func main() {
 	http.HandleFunc("/", IndexHandler)
 
-	// Try to delete the socket first, otherwise ListenAndServe fails
-	// and returns an error like "address already in use".
-	syscall.Unlink("./test.sock")
-
-	// Create and start the server
-	server := http.Server{
-		Addr:   "./test.sock", // Listen on Unix Socket
-		Logger: logger,        // Logger to be called after every request
-
-		// XHeaders make the server overwrite the remote IP address in
-		// http.Request.RemoteAddr with the contents of the X-Forwarded-For
-		// HTTP header when possible.
+	// Setup the custom handler
+	handler := httpxtra.Handler{
+		Logger:   logger,
 		XHeaders: true,
 	}
-	if e := server.ListenAndServe(); e != nil {
+
+	// Setup the server
+	server := http.Server{
+		Addr:    "./test.sock", // Listen on Unix Socket
+		Handler: handler,       // Custom httpxtra.Handler
+	}
+
+	// ListenAndServe fails with "address already in use" if the socket
+	// file exists.
+	syscall.Unlink("./test.sock")
+
+	// Use our custom listener
+	if e := httpxtra.ListenAndServe(server); e != nil {
 		fmt.Println(e.Error())
 	}
+}
+
+func logger(r *http.Request, created time.Time, status, bytes int) {
+	fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
 }

@@ -13,9 +13,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
-	"github.com/fiorix/go-web/http"
 	_ "github.com/ziutek/mymysql/godrv"
 )
 

@@ -11,11 +11,10 @@ import (
 	"errors"
 	"html/template"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	text_template "text/template"
-
-	"github.com/fiorix/go-web/http"
 )
 
 // LoadTemplates pre-load all html files under dir, recursively.

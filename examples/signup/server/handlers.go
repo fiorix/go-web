@@ -9,10 +9,10 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"io"
+	"net/http"
 	"strings"
 
-	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/sessions"
+	"github.com/gorilla/sessions"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {

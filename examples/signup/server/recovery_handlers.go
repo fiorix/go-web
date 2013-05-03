@@ -6,10 +6,10 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
-	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/sessions"
+	"github.com/gorilla/sessions"
 )
 
 func RecoveryHandler(w http.ResponseWriter, r *http.Request) {

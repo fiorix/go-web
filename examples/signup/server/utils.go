@@ -8,12 +8,12 @@ import (
 	"encoding/hex"
 	"log"
 	"net"
+	"net/http"
 	"net/smtp"
 	"os"
 	"path/filepath"
 
-	"github.com/fiorix/go-web/http"
-	"github.com/fiorix/go-web/sessions"
+	"github.com/gorilla/sessions"
 )
 
 // https is a wrapper for HandlerFunc functions that enforces HTTPS on GET.

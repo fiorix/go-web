@@ -5,13 +5,15 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"path/filepath"
 	"time"
 
-	"github.com/fiorix/go-web/http"
+	"github.com/fiorix/go-web/httpxtra"
 	"github.com/fiorix/go-web/remux"
 )
 
@@ -69,7 +71,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.Vars[0]
+	title := remux.Vars(r)[0]
 	p, err := loadPage(title)
 	if err != nil {
 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
@@ -79,7 +81,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.Vars[0]
+	title := remux.Vars(r)[0]
 	p, err := loadPage(title)
 	if err != nil {
 		p = &Page{Title: title}
@@ -88,7 +90,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.Vars[0]
+	title := remux.Vars(r)[0]
 	body := r.FormValue("body")
 	p := &Page{Title: title, Body: []byte(body)}
 	err := p.save()
@@ -100,25 +102,23 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
-func logger(w http.ResponseWriter, r *http.Request) {
-	log.Printf("HTTP %d %s %s (%s) :: %s",
-		w.Status(),
-		r.Method,
-		r.URL.Path,
-		r.RemoteAddr,
-		time.Since(r.Created))
-}
-
 func main() {
 	title_re := "([a-zA-Z0-9]+)$"
 	remux.HandleFunc("^/$", IndexHandler)
 	remux.HandleFunc("^/view/"+title_re, viewHandler)
 	remux.HandleFunc("^/edit/"+title_re, editHandler)
 	remux.HandleFunc("^/save/"+title_re, saveHandler)
+	handler := httpxtra.Handler{
+		Logger:  logger,
+		Handler: remux.DefaultServeMux,
+	}
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: remux.DefaultServeMux,
-		Logger:  logger,
+		Handler: handler,
 	}
 	server.ListenAndServe()
+}
+
+func logger(r *http.Request, created time.Time, status, bytes int) {
+	fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
 }
