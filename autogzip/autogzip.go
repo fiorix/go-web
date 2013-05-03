@@ -8,9 +8,8 @@ package autogzip
 import (
 	"compress/gzip"
 	"io"
+	"net/http"
 	"strings"
-
-	"github.com/fiorix/go-web/http"
 )
 
 type ResponseWriter struct {
@@ -23,7 +22,6 @@ func (w ResponseWriter) Write(b []byte) (int, error) {
 }
 
 // Handle provides on-the-fly gzip encoding for other handlers.
-// BOZO
 //
 // Usage:
 //

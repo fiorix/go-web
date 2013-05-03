@@ -2,6 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Server-Sent events (SSE)
+// http://dev.w3.org/html5/eventsource/
+//
+// Usage example:
+//
+//	func SSEHandler(w http.ResponseWriter, req *http.Request) {
+//	        conn, err := sse.ServeEvents(w)
+//	        if err != nil {
+//	                http.Error(w, err.Error(), http.StatusInternalServerError)
+//	                return
+//	        }
+//	        defer conn.Close()
+//	        for i := 0; i < 10; i++ {
+//	                sse.SendEvent(conn, &sse.MessageEvent{Data: "Hello, world"})
+//	                time.Sleep(1 * time.Second)
+//	        }
+//	}
 package sse
 
 import (
@@ -9,8 +26,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
-
-	"github.com/fiorix/go-web/http"
+	"net/http"
 )
 
 var ErrNoHijack = errors.New("Server does not support hijacking")

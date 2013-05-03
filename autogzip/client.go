@@ -8,11 +8,10 @@ import (
 	"compress/gzip"
 	"crypto/tls"
 	"io/ioutil"
-
-	"github.com/fiorix/go-web/http"
+	"net/http"
 )
 
-// GetPage gets pages using gzip encoding when possible.
+// GetPage is an HTTP client that supports gzip encoding.
 func GetPage(url string) ([]byte, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

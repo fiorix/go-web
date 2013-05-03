@@ -2,14 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// remux is a simple request multiplexer that supports regular expressions.
+//
+// Example:
+//
+//    package main
+//
+//    import (
+//    	"fmt"
+//    	"net/http"
+//
+//    	"github.com/fiorix/go-web/remux"
+//    )
+//
+//    func IndexHandler(w http.ResponseWriter, r *http.Request) {
+//    	vars := remux.Vars(r)
+//    	fmt.Fprintln(w, "Hello, world", vars)
+//    }
+//
+//    func main() {
+//    	remux.HandleFunc("^/(foo|bar)?$", IndexHandler)
+//    	server := http.Server{
+//    		Addr:    ":8080",
+//    		Handler: remux.DefaultServeMux,
+//    	}
+//    	server.ListenAndServe()
+//    }
 package remux
 
 import (
+	"net/http"
 	"path"
 	"regexp"
 	"sync"
-
-	"github.com/fiorix/go-web/http"
 )
 
 // ServeMux is an HTTP request multiplexer.
@@ -19,9 +44,6 @@ import (
 //
 // Patterns are regular expressions, like "^/$". On routing decision,
 // the handler of the first regex that match against URL.Path is executed.
-//
-// The result of the execution of the regexp pattern on URL.Path is stored
-// in Request.Vars.
 //
 // Patterns may optionally begin with a host name, restricting matches to
 // URLs on that host only.  Host-specific patterns take precedence over
@@ -42,8 +64,32 @@ type muxEntry struct {
 	h        http.Handler
 }
 
+var vdata map[*http.Request][]string
+var vlock sync.RWMutex
+
+func setVar(r *http.Request, m []string) {
+	if vdata == nil {
+		vdata = make(map[*http.Request][]string)
+	}
+	vlock.Lock()
+	defer vlock.Unlock()
+	vdata[r] = m
+}
+
+// Vars returns the result of the regex execution on the URL pattern.
+func Vars(r *http.Request) []string {
+	if vdata == nil {
+		return nil
+	}
+	vlock.RLock()
+	defer vlock.RUnlock()
+	return vdata[r]
+}
+
 // NewServeMux allocates and returns a new ServeMux.
-func NewServeMux() *ServeMux { return &ServeMux{m: make(map[*regexp.Regexp]muxEntry)} }
+func NewServeMux() *ServeMux {
+	return &ServeMux{m: make(map[*regexp.Regexp]muxEntry)}
+}
 
 // DefaultServeMux is the default ServeMux used by Serve.
 var DefaultServeMux = NewServeMux()
@@ -91,7 +137,7 @@ func (mux *ServeMux) handler(r *http.Request) http.Handler {
 		h = http.NotFoundHandler()
 	}
 	// Vars hold the result of the pattern regexp executed on URL.Path
-	r.Vars = m
+	setVar(r, m)
 	return h
 }
 
