@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // autogzip provides on-the-fly gzip encoding for http servers.
-
 package autogzip
 
 import (
@@ -24,6 +23,7 @@ func (w ResponseWriter) Write(b []byte) (int, error) {
 }
 
 // Handle provides on-the-fly gzip encoding for other handlers.
+// BOZO
 //
 // Usage:
 //
