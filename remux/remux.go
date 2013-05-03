@@ -76,6 +76,20 @@ func setVar(r *http.Request, m []string) {
 	vdata[r] = m
 }
 
+func delVar(r *http.Request) {
+	if vdata == nil {
+		return
+	}
+	vlock.RLock()
+	_, exists := vdata[r]
+	vlock.RUnlock()
+	if exists {
+		vlock.Lock()
+		defer vlock.Unlock()
+		delete(vdata, r)
+	}
+}
+
 // Vars returns the result of the regex execution on the URL pattern.
 func Vars(r *http.Request) []string {
 	if vdata == nil {
@@ -153,6 +167,7 @@ func (mux *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	mux.handler(r).ServeHTTP(w, r)
+	delVar(r)
 }
 
 // Handle registers the handler for the given pattern.
