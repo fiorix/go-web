@@ -59,7 +59,7 @@ func ReadConfig(filename string) (*ConfigData, error) {
 	if err := xml.Unmarshal(buf, cfg); err != nil {
 		return nil, err
 	}
-	// Make StaticPath and TemplatePath relative to the config file's dir.
+	// Make file paths relative to the config file's dir.
 	basedir := filepath.Dir(filename)
 	relativePath(basedir, &cfg.SSL.CertFile)
 	relativePath(basedir, &cfg.SSL.KeyFile)
