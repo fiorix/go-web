@@ -36,6 +36,7 @@ func ServeEvents(w http.ResponseWriter) (net.Conn, *bufio.ReadWriter, error) {
 	conn, buf, err := hj.Hijack()
 	fmt.Fprintf(conn, "HTTP/1.1 200 OK\r\n")
 	w.Header().Write(conn)
+	fmt.Fprintf(conn, "\r\n")
 	return conn, buf, err
 }
 
