@@ -48,7 +48,7 @@ func (lw *logWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 }
 
 func trimPort(s string) string {
-	for i := len(s) - 1; i > 0; i-- {
+	for i := len(s) - 1; i >= 0; i-- {
 		if s[i] == ':' {
 			return s[:i]
 		}
