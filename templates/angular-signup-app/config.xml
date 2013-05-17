@@ -23,7 +23,7 @@
 
   <!--
   InviteOnly can be used to lock the sign up form.
-  If enabled, the code must be set with `redis-cli set invite:foobared`
+  If enabled, the code must be set with `redis-cli set invite foobared`
   -->
   <InviteOnly>true</InviteOnly>
 
@@ -47,7 +47,7 @@
 
   <!--
   MySQL is required, and must be set up with assets/files/database.sql.
-  See github.com/go-sql-driver/mysql for examples connection strings.
+  See github.com/go-sql-driver/mysql for examples of connection strings.
   -->
   <MySQL>user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8</MySQL>
 
@@ -58,7 +58,7 @@
   <Redis>127.0.0.1:6379 db=0 passwd=</Redis>
 
   <!--
-  Email server used for sign up and account recovery (lost passwd).
+  Email server used for sign up and account recovery.
   The PlainAuth part is optional.
   -->
   <SMTP>
