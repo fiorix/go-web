@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Server settings:
+
+- Debug: Extra logging.
+- XHeaders: If set to true, the server uses the content of the
+    X-Forwarded-For HTTP header as the client IP. Useful when
+    the server sits behind a proxy like Nginx.
+- Addr: Listen interface and port number, or unix socket path.
+    e.g. :port, or ip:port, or /path/to/server.sock
+-->
+<Server Debug="true" XHeaders="false" Addr=":8080">
+  <!--
+  <SSL Addr=":8443">
+    <CertFile>./cert/server.crt</CertFile>
+    <KeyFile>./cert/server.key</KeyFile>
+  </SSL>
+  -->
+
+  <!--
+  SessionKey is the cookie secret of Gorilla's session package:
+  http://www.gorillatoolkit.org/pkg/sessions
+
+  Run "server -keygen" to generate new key.
+  -->
+  <SessionKey>9d50e6eca145994201d7ad713562f0c0bd4f67745bee9914</SessionKey>
+
+  <!-- Assets directories -->
+  <StaticPath>./static</StaticPath>
+  <TemplatePath>./templates</TemplatePath>
+
+  <!-- Databases (MySQL and Redis are required)
+  Use database.sql to set up MySQL.
+  -->
+  <MySQL>unix:/tmp/mysql.sock*dummy/foo/bar</MySQL>
+  <Redis>127.0.0.1:6379 db=0 passwd=</Redis>
+
+  <!-- Email server used for sign up and lost passwd. -->
+  <SMTP>
+    <Addr>smtp.gmail.com:587</Addr>
+    <From>noreply@mydomain.com</From>
+    <ReplyTo>info@mydomain.com</ReplyTo>
+    <PlainAuth> <!-- optional -->
+      <User>noreply@mydomain.com</User>
+      <Passwd>foobar</Passwd>
+      <Host>smtp.gmail.com</Host>
+    </PlainAuth>
+  </SMTP>
+</Server>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{template "title" .}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="/static/css/bootstrap-combined-2.3.1.min.css" rel="stylesheet">
+    {{template "header" .}}
+  </head>
+  <body>
+    <div class="container">
+      {{template "page" .}}
+
+      <hr>
+      <div class="footer">
+        <p>&copy; 2013 Foo Bar</p>
+      </div>
+
+    </div> <!-- /container -->
+    <script src="/static/js/jquery-1.9.1.min.js"></script>
+    <script src="/static/js/bootstrap-2.3.1.min.js"></script>
+    {{template "scripts" .}}
+  </body>
+</html>
