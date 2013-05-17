@@ -47,15 +47,6 @@ func (lw *logWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	return lw.w.(http.Hijacker).Hijack()
 }
 
-func trimPort(s string) string {
-	for i := len(s) - 1; i >= 0; i-- {
-		if s[i] == ':' {
-			return s[:i]
-		}
-	}
-	return s
-}
-
 // ApacheCommonLog returns an Apache Common access log string.
 func ApacheCommonLog(r *http.Request, created time.Time, status, bytes int) string {
 	u := "-"
@@ -64,8 +55,12 @@ func ApacheCommonLog(r *http.Request, created time.Time, status, bytes int) stri
 			u = name
 		}
 	}
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		ip = r.RemoteAddr
+	}
 	return fmt.Sprintf("%s - %s [%s] \"%s %s %s\" %d %d",
-		trimPort(r.RemoteAddr),
+		ip,
 		u,
 		created.Format("02/Jan/2006:15:04:05 -0700"),
 		r.Method,
