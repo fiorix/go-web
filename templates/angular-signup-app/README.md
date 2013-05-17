@@ -53,3 +53,7 @@ Make sure the Go compiler is installed and ``$GOPATH`` is set.
 
 	sudo make install
 	sudo make uninstall
+
+7. Allow non-root user to listen on low ports
+
+	/sbin/setcap 'cap_net_bind_service=+ep' /opt/bozo/server
