@@ -71,9 +71,12 @@ type AuthHandlerFunc func(http.ResponseWriter, *http.Request, *sessions.Session)
 // authenticated is a wrapper for HandlerFunc functions that automatically
 // checks the (cookie) session. If there's no session available then the
 // request is automatically redirected to the sign in page.
-func authenticated(fn AuthHandlerFunc) http.HandlerFunc {
+func authenticated(fn AuthHandlerFunc, csrfcheck bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO: Prefer HTTPS? Perhaps is better to change the links.
+		if csrfcheck && r.Header.Get("X-Requested-With") == "" {
+			http.NotFound(w, r)
+			return
+		}
 		s, err := Session.Get(r, "s")
 		if s == nil || s.Values["Id"] == nil || err != nil {
 			http.Redirect(w, r, "/signin.html", 302)

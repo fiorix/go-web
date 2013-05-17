@@ -46,10 +46,9 @@ func route() {
 
 	// Private handlers (only for authenticated users)
 	http.Handle("/u/", http.StripPrefix("/u/",
-		authenticated(UserFS(Config.UsersDocumentRoot))))
-	http.HandleFunc("/u/index.json", authenticated(UserIndexHandler))
-	http.HandleFunc("/u/search.json", authenticated(SearchHandler))
-	http.HandleFunc("/u/settings.json", authenticated(UserSettingsHandler))
+		authenticated(UserFS(Config.UsersDocumentRoot), false)))
+	http.HandleFunc("/u/index.json", authenticated(UserIndexHandler, true))
+	http.HandleFunc("/u/settings.json", authenticated(UserSettingsHandler, true))
 }
 
 func hello() {
