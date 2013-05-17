@@ -27,34 +27,34 @@ It's now called **bozo**, and you're ready to continue the following steps.
 
 Make sure the Go compiler is installed and ``$GOPATH`` is set.
 
-- Install dependencies:
+Install dependencies:
 
 	make deps
 
-- Compile the server, minify and compress JS and CSS:
+Compile the server, minify and compress JS and CSS:
 
 	make clean all
 
-- Generate a self-signed SSL certificate (optional):
+Generate a self-signed SSL certificate (optional):
 
 	cd SSL
 	make
 
-- Set up MySQL (make sure Redis is running too):
+Set up MySQL (make sure Redis is running too):
 
 	sudo mysql < assets/files/database.sql
 
-- Edit the config and run the dev server (check MySQL and Redis settings):
+Edit the config and run the dev server (check MySQL and Redis settings):
 
 	vi config.xml
 	./server/server
 
-- Install, uninstall. Edit Makefile and set PREFIX to the target directory:
+Install, uninstall. Edit Makefile and set PREFIX to the target directory:
 
 	sudo make install
 	sudo make uninstall
 
-- Allow non-root process to listen on low ports:
+Allow non-root process to listen on low ports:
 
 	/sbin/setcap 'cap_net_bind_service=+ep' /opt/bozo/server
 
