@@ -53,12 +53,12 @@
       <h2 class="single-page-form-heading">Settings</h2>
       <input type="text" class="input-block-level" placeholder="Full Name (optional)" autofocus ng-model="user.FullName">
       <div class="alert alert-error" ng-show="error=='InvalidName'">
-	Invalid name.
+        Invalid name.
         <a class="close" ng-click="close()">×</a>
       </div>
       <input type="password" class="input-block-level" placeholder="Old password" ng-model="user.OldPasswd">
       <div class="alert alert-error" ng-show="error=='InvalidOldPasswd'">
-	Old password does not match.
+        Old password does not match.
         <a class="close" ng-click="close()">×</a>
       </div>
       <input type="password" class="input-block-level" placeholder="New password" ng-model="user.NewPasswd">
