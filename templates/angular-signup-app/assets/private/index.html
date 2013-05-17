@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" ng-app="Index">
+<head>
+  <meta charset="utf-8">
+  <title>angular-signup-app</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link href="../css/bootstrap-2.3.1.min.css" rel="stylesheet">
+  <link href="../css/font-awesome-3.0.min.css" rel="stylesheet">
+  <!--[if IE 7]>
+  <link rel="stylesheet" href="../css/font-awesome-ie7.min.css">
+  <![endif]-->
+  <style>
+    @media (max-width: 979px) { body {padding-top: 0;} }
+    body {padding-top: 60px;}
+    code {color:#333;}
+  </style>
+  <link href="../css/bootstrap-responsive-2.3.1.min.css" rel="stylesheet">
+  <script src="../lib/jquery-1.9.1.min.js"></script>
+  <script src="../lib/bootstrap-2.3.1.min.js"></script>
+  <script src="../lib/angular-1.0.6.min.js"></script>
+  <script src="js/index.min.js"></script>
+</head>
+<body ng-controller="Index">
+	<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+	    <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="#">angular-signup-app</a>
+        <div class="nav-collapse collapse">
+          <ul class="nav">
+            <li class="active"><a href="#">Home</a></li>
+          </ul>
+          <ul class="nav pull-right">
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span ng-bind="user.Email"></span><b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="settings.html">Settings</a></li>
+                <li class="divider"></li>
+                <li><a href="../signout/">Sign out</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>Hello, world</h1>
+    <hr>
+    <div class="footer">
+      <p>&copy; 2013 angular-signup-app</p>
+    </div>
+  </div> <!-- /container -->
+</body>
+</html>

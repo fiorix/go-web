@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en" ng-app="Settings">
+<head>
+  <meta charset="utf-8">
+  <title>angular-signup-app</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link href="../css/bootstrap-combined-2.3.1.min.css" rel="stylesheet">
+  <link href="../css/single-page-form.min.css" rel="stylesheet">
+  <style>
+    @media (max-width: 979px) { body {padding-top: 0;} }
+    body {padding-top: 60px;}
+    code {color:#333;}
+  </style>
+  <script src="../lib/jquery-1.9.1.min.js"></script>
+  <script src="../lib/bootstrap-2.3.1.min.js"></script>
+  <script src="../lib/angular-1.0.6.min.js"></script>
+  <script src="js/index.js"></script>
+  <script src="js/settings.min.js"></script>
+</head>
+<body ng-controller="Settings">
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="index.html">angular-signup-app</a>
+        <div class="nav-collapse collapse">
+          <ul class="nav">
+            <li><a href="index.html">Settings</a></li>
+          </ul>
+          <ul class="nav pull-right">
+            <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span ng-bind="user.Email"></span><b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="settings.html">Settings</a></li>
+                <li class="divider"></li>
+                <li><a href="../signout/">Sign out</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <form class="single-page-form" method="post" ng-hide="error=='NotFound'">
+      <h2 class="single-page-form-heading">Settings</h2>
+      <input type="text" class="input-block-level" placeholder="Full Name (optional)" autofocus ng-model="user.FullName">
+      <div class="alert alert-error" ng-show="error=='InvalidName'">
+	Invalid name.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <input type="password" class="input-block-level" placeholder="Old password" ng-model="user.OldPasswd">
+      <div class="alert alert-error" ng-show="error=='InvalidOldPasswd'">
+	Old password does not match.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <input type="password" class="input-block-level" placeholder="New password" ng-model="user.NewPasswd">
+      <div class="alert alert-error" ng-show="error=='InvalidPasswd'">
+        Password must be at least 4 characters long.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <input type="password" class="input-block-level" placeholder="Confirm" ng-model="user.Confirm">
+      <div class="alert alert-error" ng-show="error=='PasswdMismatch'">
+        Password and confirmation does not match.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <button class="btn btn-large btn-primary" btn-submit="working" data-loading-text="Saving..." ng-click="update(user)">Save</button>
+      <div class="alert alert-success" ng-show="saved">
+        Saved!
+        <a class="close" ng-click="close()">×</a>
+      </div>
+    </form>
+    <hr>
+    <div class="footer">
+      <p>&copy; 2013 angular-signup-app</p>
+    </div>
+  </div> <!-- /container -->
+</body>
+</html>

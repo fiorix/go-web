@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Server debug="true">
+  <!--
+  HTTP server settings:
+  - addr: Interface and port number, or unix socket path to listen on.
+      e.g. :port, or ip:port, or /path/to/server.sock
+  - xheaders: If set to true the server uses the content of
+      X-Forwarded-For HTTP header as the client IP. Useful when
+      the server sits behind a proxy like Nginx.
+  -->
+  <HTTP addr=":8080" xheaders="false"/>
+  <HTTPS addr=":8443">
+    <CrtFile>./SSL/server.crt</CrtFile>
+    <KeyFile>./SSL/server.key</KeyFile>
+  </HTTPS>
+
+  <!--
+  SessionKey is the cookie secret of Gorilla's session package:
+  http://www.gorillatoolkit.org/pkg/sessions
+  Use `server -keygen` to generate random keys.
+  -->
+  <SessionKey>e9711949730142f034c1287c3057e756574ae46465b45be5</SessionKey>
+
+  <!--
+  InviteOnly can be used to lock the sign up form.
+  If enabled, the code must be set with `redis-cli set invite:foobared`
+  -->
+  <InviteOnly>true</InviteOnly>
+
+  <!--
+  DocumentRoot points to a directory with public files, which is served
+  under the "/" endpoint of the server.
+  -->
+  <DocumentRoot>./assets/public</DocumentRoot>
+
+  <!--
+  UsersDocumentRoot points to a directory with files that are served
+  only for users that are signed in, under the "/u" endpoint of the server.
+  -->
+  <UsersDocumentRoot>./assets/private</UsersDocumentRoot>
+
+  <!--
+  TemplatesDirectory points to a directory with plain text templates.
+  TemplatesDirectory does not load files from sub-directories.
+  -->
+  <TemplatesDirectory>./assets/template</TemplatesDirectory>
+
+  <!--
+  MySQL is required, and must be set up with assets/files/database.sql.
+  See github.com/go-sql-driver/mysql for examples connection strings.
+  -->
+  <MySQL>user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8</MySQL>
+
+  <!--
+  Redis is required.
+  See https://github.com/fiorix/go-redis for examples of connection strings.
+  -->
+  <Redis>127.0.0.1:6379 db=0 passwd=</Redis>
+
+  <!--
+  Email server used for sign up and account recovery (lost passwd).
+  The PlainAuth part is optional.
+  -->
+  <SMTP>
+    <Addr>smtp.gmail.com:587</Addr>
+    <From>noreply@domain.com</From>
+    <PlainAuth> <!-- optional -->
+      <User>noreply@domain.com</User>
+      <Passwd>passwd</Passwd>
+      <Host>smtp.gmail.com</Host>
+    </PlainAuth>
+  </SMTP>
+</Server>
