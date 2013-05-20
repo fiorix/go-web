@@ -25,7 +25,11 @@ type ConfigData struct {
 		KeyFile string
 	}
 
-	SessionKey         []byte
+	Session struct {
+		AuthKey  []byte
+		CryptKey []byte
+	}
+
 	InviteOnly         bool
 	DocumentRoot       string
 	UsersDocumentRoot  string

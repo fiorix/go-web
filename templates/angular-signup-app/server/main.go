@@ -37,18 +37,20 @@ var (
 func route() {
 	// Public handlers
 	http.Handle("/", http.FileServer(http.Dir(Config.DocumentRoot)))
-	http.HandleFunc("/signin.json", SigninHandler)
+	http.HandleFunc("/signup.json", nocsrf(SignupHandler))
+	http.HandleFunc("/signup-confirm.json", nocsrf(SignupConfirmHandler))
+	http.HandleFunc("/signin.json", nocsrf(SigninHandler))
 	http.HandleFunc("/signout/", SignoutHandler)
-	http.HandleFunc("/signup.json", SignupHandler)
-	http.HandleFunc("/signup-confirm.json", SignupConfirmHandler)
-	http.HandleFunc("/recovery.json", RecoveryHandler)
-	http.HandleFunc("/recovery-confirm.json", RecoveryConfirmHandler)
+	http.HandleFunc("/recovery.json", nocsrf(RecoveryHandler))
+	http.HandleFunc("/recovery-confirm.json", nocsrf(RecoveryConfirmHandler))
 
 	// Private handlers (only for authenticated users)
 	http.Handle("/u/", http.StripPrefix("/u/",
-		authenticated(UserFS(Config.UsersDocumentRoot), false)))
-	http.HandleFunc("/u/index.json", authenticated(UserIndexHandler, true))
-	http.HandleFunc("/u/settings.json", authenticated(UserSettingsHandler, true))
+		authenticated(UserFS(Config.UsersDocumentRoot))))
+	http.HandleFunc("/u/index.json",
+		nocsrf(authenticated(UserIndexHandler)))
+	http.HandleFunc("/u/settings.json",
+		nocsrf(authenticated(UserSettingsHandler)))
 }
 
 func hello() {
@@ -67,7 +69,7 @@ func main() {
 	sessKey := flag.Bool("keygen", false, "dump random key and exit")
 	flag.Parse()
 	if *sessKey {
-		fmt.Println(RandHex(24))
+		fmt.Println(RandHex(16))
 		return
 	}
 	Config, err = ReadConfig(*cfgfile)
@@ -86,7 +88,8 @@ func main() {
 		log.Fatal(err)
 	}
 	// Set up session keys
-	Session = sessions.NewCookieStore(Config.SessionKey)
+	Session = sessions.NewCookieStore(
+		Config.Session.AuthKey, Config.Session.CryptKey)
 	// Set up routing and print server info
 	route()
 	hello()

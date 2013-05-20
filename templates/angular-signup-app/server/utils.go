@@ -66,17 +66,24 @@ func serverURL(r *http.Request, preferSSL bool) string {
 	return fmt.Sprintf("%s://%s/", proto, host)
 }
 
+// nocsrf protects against csrf or xsrf attacks.
+func nocsrf(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-Requested-With") == "" {
+			http.NotFound(w, r)
+		} else {
+			fn(w, r)
+		}
+	}
+}
+
 type AuthHandlerFunc func(http.ResponseWriter, *http.Request, *sessions.Session)
 
 // authenticated is a wrapper for HandlerFunc functions that automatically
 // checks the (cookie) session. If there's no session available then the
 // request is automatically redirected to the sign in page.
-func authenticated(fn AuthHandlerFunc, csrfcheck bool) http.HandlerFunc {
+func authenticated(fn AuthHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if csrfcheck && r.Header.Get("X-Requested-With") == "" {
-			http.NotFound(w, r)
-			return
-		}
 		s, err := Session.Get(r, "s")
 		if s == nil || s.Values["Id"] == nil || err != nil {
 			http.Redirect(w, r, "/signin.html", 302)
