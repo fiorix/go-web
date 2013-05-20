@@ -152,6 +152,19 @@ func RecoveryConfirmHandler(w http.ResponseWriter, r *http.Request) {
 	s.Options = &sessions.Options{MaxAge: 0, Path: "/"}
 	s.Values["Id"] = u.Id
 	s.Save(r, w)
-	// TODO: send another email like in sign up?
+	// Render confirmation email message with the system's URL.
+	msg := bytes.NewBuffer(nil)
+	err = Tmpl.ExecuteTemplate(msg, "recovery-confirm-email.txt",
+		map[string]string{
+			"ReplyTo": Config.SMTP.ReplyTo,
+			"Email":   email,
+			"IP":      remoteIP(r),
+			"URL":     serverURL(r, true),
+		})
+	if err != nil {
+		httpError(w, 500, err)
+		return
+	}
+	SendMail([]string{email}, msg.Bytes())
 	JSON(w, RecoveryConfirmResponse{Ok: true})
 }
