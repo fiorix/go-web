@@ -1,7 +1,7 @@
-drop database if exists angular-signup-app;
-create database angular-signup-app character set utf8 collate utf8_unicode_ci;
-grant all privileges on angular-signup-app.* to 'angular-signup-app'@'localhost' identified by 'angular-signup-app';
-use angular-signup-app;
+drop database if exists dummy;
+create database dummy character set utf8 collate utf8_unicode_ci;
+grant all privileges on dummy.* to 'foo'@'localhost' identified by 'bar';
+use dummy;
 
 create table User (
   Id integer not null auto_increment,
