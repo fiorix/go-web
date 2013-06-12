@@ -5,8 +5,8 @@
   - addr: Interface and port number, or unix socket path to listen on.
       e.g. :port, or ip:port, or /path/to/server.sock
   - xheaders: If set to true the server uses the content of
-      X-Forwarded-For HTTP header as the client IP. Useful when
-      the server sits behind a proxy like Nginx.
+      either X-Real-IP or X-Forwarded-For HTTP header as the client IP.
+      Useful when the server sits behind a proxy like Nginx.
   -->
   <HTTP addr=":8080" xheaders="false"/>
   <HTTPS addr=":8443">
