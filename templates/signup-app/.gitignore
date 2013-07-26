@@ -1,1 +1,3 @@
-server/server
+*.swp
+.DS_Store
+server

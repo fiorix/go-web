@@ -4,7 +4,7 @@
 
 PREFIX=/opt/angular-signup-app
 
-all: server/server
+all: server
 
 deps:
 	go get -u github.com/fiorix/go-redis/redis
@@ -12,12 +12,12 @@ deps:
 	go get -u github.com/go-sql-driver/mysql
 	go get -u github.com/gorilla/sessions
 
-server/server:
+server:
 	make -C assets
-	(cd server; go build)
+	(cd src; go build -v -o ../server)
 
 clean:
-	rm -f server/server
+	rm -f server
 
 install: server/server
 	mkdir -m 750 -p ${PREFIX}
