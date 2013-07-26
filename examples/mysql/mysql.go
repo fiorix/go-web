@@ -16,7 +16,7 @@ import (
 	"net/http"
 	"time"
 
-	_ "github.com/ziutek/mymysql/godrv"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var DB *sql.DB
@@ -45,14 +45,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var err error
-	dbinfo := "dbname/user/passwd"
-	// dbinfo := "tcp:127.0.0.1:3306*dbname/user/passwd" // default tcp
-	// dbinfo := "unix:/tmp/mysql.sock*dbname/user/passwd" // performs better
-	if DB, err = sql.Open("mymysql", dbinfo); err != nil {
+	dbinfo := "user:passwd@tcp(localhost:3306)/dbname?autocommit=true"
+	if DB, err = sql.Open("mysql", dbinfo); err != nil {
 		panic(err)
 	}
-
 	// HTTP Server
 	http.HandleFunc("/", IndexHandler)
-	http.ListenAndServe(":8080", nil)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
