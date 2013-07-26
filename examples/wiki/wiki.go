@@ -60,7 +60,6 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(500), 500)
 		return
 	}
-
 	type PageList struct{ Title string }
 	pages := make([]PageList, len(files))
 	for n, name := range files {
@@ -112,11 +111,11 @@ func main() {
 		Logger:  logger,
 		Handler: remux.DefaultServeMux,
 	}
-	server := http.Server{
+	s := http.Server{
 		Addr:    ":8080",
 		Handler: handler,
 	}
-	server.ListenAndServe()
+	log.Fatal(s.ListenAndServe())
 }
 
 func logger(r *http.Request, created time.Time, status, bytes int) {

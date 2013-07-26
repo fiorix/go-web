@@ -62,11 +62,11 @@ func main() {
 	}
 	http.HandleFunc("/", IndexHandler)
 	http.HandleFunc("/sse", SSEHandler)
-	server := http.Server{
+	s := http.Server{
 		Addr:    ":8080",
 		Handler: httpxtra.Handler{Logger: logger},
 	}
-	server.ListenAndServe()
+	log.Fatal(s.ListenAndServe())
 }
 
 func logger(r *http.Request, created time.Time, status, bytes int) {
@@ -99,8 +99,10 @@ func loadMovie(filename string) error {
 	reader := bufio.NewReader(gzfile)
 	frameNo := 1
 	frameBuf := ""
-	var frameTime time.Duration
-	var part string
+	var (
+		frameTime time.Duration
+		part      string
+	)
 	for {
 		if part, err = reader.ReadString('\n'); err != nil {
 			break

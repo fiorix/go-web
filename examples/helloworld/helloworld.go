@@ -8,6 +8,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -20,11 +21,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", IndexHandler)
-	srv := http.Server{
+	s := http.Server{
 		Addr:    ":8080",
 		Handler: httpxtra.Handler{Logger: logger},
 	}
-	srv.ListenAndServe()
+	log.Fatal(s.ListenAndServe())
 }
 
 func logger(r *http.Request, created time.Time, status, bytes int) {

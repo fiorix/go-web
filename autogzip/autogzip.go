@@ -33,7 +33,6 @@ func (w ResponseWriter) Write(b []byte) (int, error) {
 //		fmt.Fprintln(w, "zzz")
 //	}
 //
-//
 //	func main() {
 //		http.HandleFunc("/download1", DL1Handler)
 //		http.HandleFunc("/download2", DL2Handler)

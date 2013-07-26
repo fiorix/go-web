@@ -21,6 +21,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"syscall"
 	"time"
@@ -34,27 +35,21 @@ func IndexHandler(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	http.HandleFunc("/", IndexHandler)
-
 	// Setup the custom handler
 	handler := httpxtra.Handler{
 		Logger:   logger,
 		XHeaders: true,
 	}
-
 	// Setup the server
-	server := http.Server{
+	s := http.Server{
 		Addr:    "./test.sock", // Listen on Unix Socket
 		Handler: handler,       // Custom httpxtra.Handler
 	}
-
 	// ListenAndServe fails with "address already in use" if the socket
 	// file exists.
 	syscall.Unlink("./test.sock")
-
 	// Use our custom listener
-	if e := httpxtra.ListenAndServe(server); e != nil {
-		fmt.Println(e.Error())
-	}
+	log.Fatal(httpxtra.ListenAndServe(s))
 }
 
 func logger(r *http.Request, created time.Time, status, bytes int) {

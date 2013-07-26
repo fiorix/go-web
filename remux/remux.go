@@ -22,11 +22,11 @@
 //
 //    func main() {
 //    	remux.HandleFunc("^/(foo|bar)?$", IndexHandler)
-//    	server := http.Server{
+//    	s := http.Server{
 //    		Addr:    ":8080",
 //    		Handler: remux.DefaultServeMux,
 //    	}
-//    	server.ListenAndServe()
+//    	s.ListenAndServe()
 //    }
 package remux
 
