@@ -17,7 +17,7 @@
   <!--
   SessionKey is the cookie secret of Gorilla's session package:
   http://www.gorillatoolkit.org/pkg/sessions
-  Use `server -keygen` to generate random keys.
+  Use `server -keygen` to generate new random keys.
   -->
   <Session>
   	<AuthKey>98b7bc9139ae08510c93e9a041f62a07</AuthKey>

@@ -47,7 +47,7 @@ Set up MySQL (make sure Redis is running too):
 Edit the config and run the dev server (check MySQL and Redis settings):
 
 	vi config.xml
-	./server/server
+	./server
 
 Install, uninstall. Edit Makefile and set PREFIX to the target directory:
 
