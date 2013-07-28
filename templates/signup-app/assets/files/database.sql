@@ -9,5 +9,5 @@ create table User (
   Passwd varchar(40) not null,
   FullName varchar(80) null,
   IsActive boolean not null,
-  primary key(id)
+  primary key(Id)
 );
