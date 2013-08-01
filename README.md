@@ -5,10 +5,24 @@ go-web is a collection of utilities for http servers written in the
 
 It has the following packages:
 
-- autogzip: An http.Handler that supports on-the-fly gzip encoding, and a client that supports decoding.
-- httpxtra: Servers can listen on unix sockets, essential logging including Apache Common format, and support for X-Real-IP and X-Forwarded-For headers - for servers sitting behind proxies or load balancers.
-- remux: A very simple request multiplexer that supports regular expressions.
-- sse: Server-Sent Events library (for push notifications).
+### autogzip
+
+- http.Handler that supports on-the-fly gzip encoding
+- http client that supports automatic gzip decoding
+
+### httpxtra
+
+- Servers can listen on unix sockets
+- Essential logging (including Apache Common format)
+- Support for X-Real-IP and X-Forwarded-For headers for servers sitting behind proxies or load balancers.
+
+### remux
+
+A very simple request multiplexer that supports regular expressions.
+
+### sse
+
+Server-Sent Events library (for push notifications).
 
 ## Examples and application templates
 
