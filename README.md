@@ -1,25 +1,24 @@
 # go-web
 
-go-web is a collection of utilities for http servers written in Go.
+go-web is a collection of utilities for http servers written in the
+[Go](http://golang.org) programming language.
 
 It has the following packages:
 
-- autogzip: An http.Handler that supports on-the-fly gzip encoding.
-- httpxtra: Essential logging and support for X-Real-IP and X-Forwarded-For.
+- autogzip: An http.Handler that supports on-the-fly gzip encoding, and a client that supports decoding.
+- httpxtra: Servers can listen on unix sockets, essential logging including Apache Common format, and support for X-Real-IP and X-Forwarded-For headers - for servers sitting behind proxies or load balancers.
 - remux: A very simple request multiplexer that supports regular expressions.
-- sse: Server-Sent Events, a.k.a. HTTP push notifications.
+- sse: Server-Sent Events library (for push notifications).
 
-*NOTE*: go-web used to be an experimental fork of Go's
-[net/http](http://golang.org/pkg/net/http/) package. It's no longer a fork and
-now uses the standard http package, making it easier to be used along with
-[Gorilla Toolkit](http://www.gorillatoolkit.org) and other packages.
+## Examples and application templates
 
-## Examples
+Check out the [examples](https://github.com/fiorix/go-web/tree/master/examples) directory.
 
-There are some nice [examples](https://github.com/fiorix/go-web/tree/master/examples) including a full featured web application with sign up, using MySQL and
-Redis for storage.
+There are application templates in the [templates](https://github.com/fiorix/go-web/tree/master/templates) directory that can be used as starting point for new projects. Check them out too.
 
-There's also some live stuff:
+## Resources
 
-- freegeoip at http://freegeoip.net
-- sse demo at http://cos.pe
+[freegeoip.net](http://freegeoip.net) is a public API for IP geolocation that
+uses go-web, and is open source too.
+
+There's a live version of the SSE demo here: <http://cos.pe>
