@@ -1,9 +1,0 @@
-To: {{.Email}}
-Subject: Welcome!
-
-Your account has been created and is active!
-
-{{.URL}}
-
---
-Requested by IP {{.IP}}

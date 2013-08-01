@@ -1,9 +1,0 @@
-To: {{.Email}}
-Subject: Account Recovery Complete
-
-Your password has been successfully changed.
-
-{{.URL}}
-
---
-Requested by IP {{.IP}}
