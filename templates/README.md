@@ -21,6 +21,10 @@ Example:
 	cd my-project
 	./bootstrap.sh
 
+Install dependencies:
+
+	make deps
+
 Compile and run the server:
 
 	make clean all
