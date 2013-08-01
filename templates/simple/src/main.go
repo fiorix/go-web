@@ -1,4 +1,4 @@
-// Copyright 2013 Alexandre Fiori
+// Copyright 2013 %template% authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"runtime"
@@ -20,7 +21,7 @@ import (
 
 const (
 	VERSION = "1.0"
-	APPNAME = "%simple%"
+	APPNAME = "%template%"
 )
 
 var (
@@ -36,13 +37,14 @@ func route() {
 }
 
 func hello() {
-	numCPU := runtime.NumCPU()
-	label := "CPU"
-	if numCPU > 1 {
-		label += "s"
-		runtime.GOMAXPROCS(numCPU)
+	var cpuinfo string
+	if n := runtime.NumCPU(); n > 1 {
+		runtime.GOMAXPROCS(n)
+		cpuinfo = fmt.Sprintf("%d CPUs", n)
+	} else {
+		cpuinfo = "1 CPU"
 	}
-	log.Printf("%s v%s (%d %s)", APPNAME, VERSION, numCPU, label)
+	log.Printf("%s v%s (%s)", APPNAME, VERSION, cpuinfo)
 }
 
 func main() {

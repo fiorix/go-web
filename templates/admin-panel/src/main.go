@@ -1,4 +1,4 @@
-// Copyright 2013 Alexandre Fiori
+// Copyright 2013 %template% authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,7 @@ import (
 
 const (
 	VERSION = "1.0"
-	APPNAME = "%admin-panel%"
+	APPNAME = "%template%"
 )
 
 var (
@@ -54,13 +54,14 @@ func route() {
 }
 
 func hello() {
-	numCPU := runtime.NumCPU()
-	label := "CPU"
-	if numCPU > 1 {
-		label += "s"
+	var cpuinfo string
+	if n := runtime.NumCPU(); n > 1 {
+		runtime.GOMAXPROCS(n)
+		cpuinfo = fmt.Sprintf("%d CPUs", n)
+	} else {
+		cpuinfo = "1 CPU"
 	}
-	runtime.GOMAXPROCS(numCPU)
-	log.Printf("%s v%s (%d %s)", APPNAME, VERSION, numCPU, label)
+	log.Printf("%s v%s (%s)", APPNAME, VERSION, cpuinfo)
 }
 
 func main() {
@@ -108,7 +109,7 @@ func main() {
 				},
 			}
 			log.Fatal(httpxtra.ListenAndServe(server))
-			wg.Done()
+			//wg.Done()
 		}()
 	}
 	if Config.HTTPS.Addr != "" {
@@ -121,7 +122,7 @@ func main() {
 			}
 			log.Fatal(server.ListenAndServeTLS(
 				Config.HTTPS.CrtFile, Config.HTTPS.KeyFile))
-			wg.Done()
+			//wg.Done()
 		}()
 	}
 	wg.Wait()

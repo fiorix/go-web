@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-PREFIX=/opt/%admin-panel%
+PREFIX=/opt/%template%
 
 all: server
 

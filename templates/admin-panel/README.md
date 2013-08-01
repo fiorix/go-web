@@ -1,4 +1,4 @@
-# %admin-panel%
+# %template%
 
 Admin panel template written in Go, with AngularJS and Twitter Bootstrap.
 
