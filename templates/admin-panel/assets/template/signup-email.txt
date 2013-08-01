@@ -1,0 +1,13 @@
+To: {{.Email}}
+Subject: Sign up confirmation
+
+Hello!
+
+Please click the following link to confirm your account:
+
+{{.URL}}
+
+* This link expire in 24 hours.
+
+--
+Requested by IP {{.IP}}

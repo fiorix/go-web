@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" ng-app="Signup">
+<head>
+  <title>Sign up</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link href="css/bootstrap-combined-2.3.1.min.css" rel="stylesheet">
+  <link href="css/single-page-form.min.css" rel="stylesheet">
+  <script src="lib/jquery-1.9.1.min.js"></script>
+  <script src="lib/bootstrap-2.3.1.min.js"></script>
+  <script src="lib/angular-1.0.6.min.js"></script>
+  <script src="js/signup.min.js"></script>
+</head>
+<body>
+  <div class="container" ng-controller="Signup">
+    <div class="masthead">
+      <ul class="nav nav-pills pull-right">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="signin.html">Sign in</a></li>
+      </ul>
+      <h3 class="muted">%admin-panel%</h3>
+    </div>
+    <hr>
+    <form class="single-page-form">
+      <h2 class="single-page-form-heading">Sign up</h2>
+      <input type="text" class="input-block-level" placeholder="Email" autofocus autocapitalize="off" ng-model="user.Email">
+      <div class="alert alert-error" ng-show="error=='InvalidEmail'">
+        Invalid email.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <div class="alert alert-error" ng-show="error=='AlreadyExists'">
+        Email already registered.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <div class="alert alert-error" ng-show="error=='AwaitingConfirmation'">
+        Awaiting confirmation, please check your inbox and spam folders.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <div class="form-inline" ng-show="inviteOnly">
+        <p class="muted">Only invited people can sign up.</p>
+        <input type="text" class="input-block-level" placeholder="Invite code" ng-model="user.InviteCode">
+      </div>
+      <div class="alert alert-error" ng-show="error=='InvalidInviteCode'">
+        Ooops, this is not the invite code.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <label class="checkbox">
+      <input type="checkbox" ng-model="user.TOS"> I agree with the <a href="legal.html">Terms of Service</a>
+      </label>
+      <div class="alert alert-error" ng-show="error=='TOS'">
+        Please accept the Terms of Service.
+        <a class="close" ng-click="close()">×</a>
+      </div>
+      <button class="btn btn-large btn-success" btn-submit="working" data-loading-text="Sending..." ng-click="update(user)">Sign up</button>
+    </form>
+    <hr>
+    <div class="footer">
+      <p>&copy; 2013 %admin-panel%</p>
+    </div>
+  </div> <!-- /container -->
+</body>
+</html>
