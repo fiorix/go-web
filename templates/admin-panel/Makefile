@@ -16,6 +16,8 @@ server:
 	make -C assets
 	(cd src; go build -v -o ../server)
 
+.PHONY: server
+
 clean:
 	rm -f server
 
