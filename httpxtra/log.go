@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// LoggerFunc can be called by httpxtra.Handler at the end of each request.
+// LoggerFunc are functions called by httpxtra.Handler at the end of each request.
 type LoggerFunc func(r *http.Request, created time.Time, status, bytes int)
 
 type logWriter struct {

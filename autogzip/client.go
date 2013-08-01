@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-// GetPage is an HTTP client that supports gzip encoding.
+// GetPage is an HTTP client that automatically decodes gzip when necessary.
 func GetPage(url string) ([]byte, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

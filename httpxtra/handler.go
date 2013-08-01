@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// httpxtra is wrapper for http.Handler that adds extra features to the server:
+// httpxtra is a wrapper for http.Handler that adds extra features to the server:
 // - Custom logging
 // - Support for listening on TCP or UNIX sockets
 // - Support X-Real-IP and X-Forwarded-For as the remote IP if the server sits

@@ -40,7 +40,8 @@ type MessageEvent struct {
 }
 
 // ServeEvents prepares the request for SSE, push notifications.
-// Caveat: ResponseWriter.Status() returns 0 after ServeEvents is called.
+// Caveat: ResponseWriter.Status() returns 0 instead of 200 after ServeEvents
+// is called, and might break logging.
 func ServeEvents(w http.ResponseWriter) (net.Conn, *bufio.ReadWriter, error) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// autogzip provides on-the-fly gzip encoding for http servers.
+// autogzip provides on-the-fly gzip encoding for http servers. It also has
+// a client that decodes automatically when necessary (GetPage à-la Twisted).
 package autogzip
 
 import (
