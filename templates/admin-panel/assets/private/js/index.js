@@ -21,23 +21,4 @@ function Index($scope, $http) {
         $scope.user = {Email:data.Email};
       }
     });
-  $scope.search = function(q) {
-    $scope.working = true;
-    $scope.q = angular.copy(q);
-    $http.post('search.json', q).
-      success(function(data){
-        if(data.Ok){
-          if(data.Results) {
-            $scope.results = data.Results;
-          } else {
-            $scope.results = [];
-          }
-        }
-        $scope.working = false;
-      }).
-      error(function(data,status){
-        alert('HTTP '+status+': '+data);
-        $scope.working = false;
-      });
-  }
 }
