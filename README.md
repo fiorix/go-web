@@ -1,7 +1,7 @@
 # go-web
 
-go-web is a collection of utilities for http servers written for the
-[Go programming language](http://golang.org).
+go-web is a collection of utilities for http servers written in
+[Go](http://golang.org).
 
 It has the following packages:
 
