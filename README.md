@@ -14,15 +14,15 @@ It has the following packages:
 
 - Servers can listen on both TCP or Unix sockets
 - Essential request logging (including Apache Common format)
-- Support for X-Real-IP and X-Forwarded-For headers for servers sitting behind proxies or load balancers.
+- Support for X-Real-IP and X-Forwarded-For headers for servers sitting behind proxies or load balancers
 
 ### remux
 
-- A very simple request multiplexer that supports regular expressions.
+- A very simple request multiplexer that supports regular expressions
 
 ### sse
 
-- Server-Sent Events library (for push notifications).
+- Server-Sent Events library (for push notifications)
 
 
 ## Examples and application templates
