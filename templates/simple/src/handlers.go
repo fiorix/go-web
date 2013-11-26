@@ -10,6 +10,10 @@ import (
 )
 
 func TestHandler(w http.ResponseWriter, r *http.Request) {
-	bar, _ := Redis.Get("foo") // redis-cli set foo bar
-	fmt.Fprintln(w, "Hello, world", bar)
+	fmt.Fprintln(w, "Hello, world")
+
+	// Run this on the command line: redis-cli set foo bar
+	if bar, err := Redis.Get("foo"); err != nil {
+		fmt.Fprintln(w, "foo:", bar)
+	}
 }

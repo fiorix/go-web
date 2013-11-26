@@ -25,7 +25,7 @@ func remoteIP(r *http.Request) string {
 	return "" // Go1.0
 }
 
-// serverURL returns the URL of the server based on the current request.
+// serverURL returns the base URL of the server based on the current request.
 func serverURL(r *http.Request, preferSSL bool) string {
 	var (
 		addr  string
@@ -33,12 +33,12 @@ func serverURL(r *http.Request, preferSSL bool) string {
 		port  string
 		proto string
 	)
-	if Config.HTTPS.Addr == "" || !preferSSL {
+	if cfg.HTTPS.Addr == "" || !preferSSL {
 		proto = "http"
-		addr = Config.HTTP.Addr
+		addr = cfg.HTTP.Addr
 	} else {
 		proto = "https"
-		addr = Config.HTTPS.Addr
+		addr = cfg.HTTPS.Addr
 	}
 	for i := len(addr) - 1; i >= 0; i-- {
 		if addr[i] == ':' {
@@ -61,19 +61,8 @@ func serverURL(r *http.Request, preferSSL bool) string {
 	return fmt.Sprintf("%s://%s/", proto, host)
 }
 
-// nocsrf protects against csrf or xsrf attacks.
-func nocsrf(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("X-Requested-With") == "" {
-			http.NotFound(w, r)
-		} else {
-			fn(w, r)
-		}
-	}
-}
-
-// httpError renders the default error message to the http client based on
-// the code, and prints the program error to the log.
+// httpError renders the default error message based on
+// the status code, and prints the program error to the log.
 func httpError(w http.ResponseWriter, code int, msg ...interface{}) {
 	http.Error(w, http.StatusText(code), code)
 	if msg != nil && len(msg) >= 1 {
@@ -88,8 +77,8 @@ func httpError(w http.ResponseWriter, code int, msg ...interface{}) {
 	}
 }
 
-// JSON encodes a message as JSON and writes to the socket.
-func JSON(w http.ResponseWriter, d interface{}) error {
+// NewJSON encodes `d` as JSON and writes it to the http connection.
+func NewJSON(w http.ResponseWriter, d interface{}) error {
 	b, err := json.Marshal(d)
 	if err != nil {
 		return err
@@ -99,8 +88,8 @@ func JSON(w http.ResponseWriter, d interface{}) error {
 	return err
 }
 
-// ParseJSON reads an HTTP request body and parses its JSON content.
-func ParseJSON(r *http.Request, v interface{}) error {
+// JSON reads the HTTP request body and parses it as JSON.
+func JSON(r *http.Request, v interface{}) error {
 	// TODO: check mime type first?
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {

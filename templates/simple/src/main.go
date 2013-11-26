@@ -9,13 +9,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
+	"os"
 	"runtime"
 	"sync"
-	"time"
 
 	"github.com/fiorix/go-redis/redis"
-	"github.com/fiorix/go-web/httpxtra"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -25,16 +23,10 @@ const (
 )
 
 var (
-	Config *ConfigData
-	MySQL  *sql.DB
-	Redis  *redis.Client
+	cfg   *ConfigData
+	MySQL *sql.DB
+	Redis *redis.Client
 )
-
-func route() {
-	// Public handlers: add your own
-	http.Handle("/", http.FileServer(http.Dir(Config.DocumentRoot)))
-	http.HandleFunc("/test", TestHandler)
-}
 
 func hello() {
 	var cpuinfo string
@@ -48,62 +40,39 @@ func hello() {
 }
 
 func main() {
-	var err error
-	cfgfile := flag.String("config", "server.conf", "set config file")
+	cfgfile := flag.String("c", "%template%.conf", "set config file")
+	flag.Usage = func() {
+		fmt.Println("Usage: %template% [-c %template%.conf]")
+		os.Exit(1)
+	}
 	flag.Parse()
-	Config, err = ReadConfig(*cfgfile)
+
+	var err error
+	cfg, err = LoadConfig(*cfgfile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Set up databases
-	Redis = redis.New(Config.Redis)
-	MySQL, err = sql.Open("mysql", Config.MySQL)
+
+	// Set up databases.
+	Redis = redis.New(cfg.DB.Redis)
+	MySQL, err = sql.Open("mysql", cfg.DB.MySQL)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Set up routing and print server info
-	route()
+
+	// Print server info and set up HTTP routes.
 	hello()
-	// Run HTTP and HTTPS servers
+	RouteHTTP()
+
+	// Run HTTP and HTTPS servers.
 	wg := &sync.WaitGroup{}
-	if Config.HTTP.Addr != "" {
+	if cfg.HTTP.Addr != "" {
 		wg.Add(1)
-		log.Printf("Starting HTTP server on %s", Config.HTTP.Addr)
-		go func() {
-			// Use httpxtra's listener to support Unix sockets.
-			server := http.Server{
-				Addr: Config.HTTP.Addr,
-				Handler: httpxtra.Handler{
-					Logger:   logger,
-					XHeaders: Config.HTTP.XHeaders,
-				},
-			}
-			log.Fatal(httpxtra.ListenAndServe(server))
-			//wg.Done()
-		}()
+		go ListenHTTP()
 	}
-	if Config.HTTPS.Addr != "" {
+	if cfg.HTTPS.Addr != "" {
 		wg.Add(1)
-		log.Printf("Starting HTTPS server on %s", Config.HTTPS.Addr)
-		go func() {
-			server := http.Server{
-				Addr:    Config.HTTPS.Addr,
-				Handler: httpxtra.Handler{Logger: logger},
-			}
-			log.Fatal(server.ListenAndServeTLS(
-				Config.HTTPS.CrtFile, Config.HTTPS.KeyFile))
-			//wg.Done()
-		}()
+		go ListenHTTPS()
 	}
 	wg.Wait()
-}
-
-func logger(r *http.Request, created time.Time, status, bytes int) {
-	//fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
-	log.Printf("HTTP %d %s %s (%s) :: %s",
-		status,
-		r.Method,
-		r.URL.Path,
-		r.RemoteAddr,
-		time.Since(created))
 }
