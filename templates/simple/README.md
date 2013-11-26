@@ -1,53 +1,45 @@
 # %name%
 
-Simple web server template written in Go.
+Simple web server template with pre-configured MySQL and Redis.
 
-It ships with pre-configured MySQL and Redis support.
+## Preparing the environment
 
-## Prerequisites
-
-For building the application, it is required to have the following software:
+Prerequisites:
 
 - Git
 - rsync
 - GNU Make
 - [Go](http://golang.org) 1.0.3 or newer
 
-## Preparing the environment
+First, you should make a copy of this directory, and prepare the new project:
 
-First, you should make a copy of this directory, and prepare your new
-project:
-
-	cp -r admin-template bozo
+	cp -r simple bozo
 	cd bozo
 	./bootstrap.sh
 
-Your project is now called **bozo**, and you're ready to continue the
-following steps.
+Your project is now called **bozo** and is ready to use.
 
-Make sure the Go compiler is installed and ``$GOPATH`` is set.
+Make sure the Go compiler is installed and `$GOPATH` is set.
 
-Install dependencies:
+Install dependencies, and compile:
 
 	make deps
-
-Compile the server:
-
-	make clean all
+	make clean
+	make all
 
 Generate a self-signed SSL certificate (optional):
 
-	cd SSL
+	cd ssl
 	make
 
 Start Redis if you plan to use it, and set up MySQL (both optional):
 
 	sudo mysql < assets/files/database.sql
 
-Edit the config and run the dev server (check MySQL and Redis settings):
+Edit the config file and run the server (check MySQL and Redis settings):
 
-	vi server.conf
-	./server
+	vi %name%.conf
+	./%name%
 
 Install, uninstall. Edit Makefile and set PREFIX to the target directory:
 
