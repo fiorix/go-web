@@ -1,4 +1,4 @@
-# %template%
+# %name%
 
 Simple web server template written in Go.
 

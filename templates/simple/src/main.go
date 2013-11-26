@@ -1,4 +1,4 @@
-// Copyright 2013 %template% authors.  All rights reserved.
+// Copyright 2013 %name% authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ import (
 
 const (
 	VERSION = "1.0"
-	APPNAME = "%template%"
+	APPNAME = "%name%"
 )
 
 var (
@@ -40,9 +40,9 @@ func hello() {
 }
 
 func main() {
-	cfgfile := flag.String("c", "%template%.conf", "set config file")
+	cfgfile := flag.String("c", "%name%.conf", "set config file")
 	flag.Usage = func() {
-		fmt.Println("Usage: %template% [-c %template%.conf]")
+		fmt.Println("Usage: %name% [-c %name%.conf]")
 		os.Exit(1)
 	}
 	flag.Parse()

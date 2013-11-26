@@ -1,30 +1,27 @@
-# Copyright 2009-2013 The server Authors. All rights reserved.
+# Copyright 2013 %name% Authors.  All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-PREFIX=/opt/%template%
+PREFIX=/opt/%name%
 
 all: server
 
 deps:
-	go get -u github.com/fiorix/go-redis/redis
-	go get -u github.com/fiorix/go-web/httpxtra
-	go get -u github.com/go-sql-driver/mysql
+	make -C deps src
 
 server:
-	(cd src; go build -v -o ../server)
-
-.PHONY: server
+	make -C src
+	@cp src/%name% .
 
 clean:
-	rm -f server
+	make -C src clean
 
 install: server
 	mkdir -m 750 -p ${PREFIX}
-	install -m 750 server ${PREFIX}/server
-	install -m 640 server.conf ${PREFIX}
+	install -m 750 %name% ${PREFIX}/server
+	install -m 640 %name%.conf ${PREFIX}
 	mkdir -m 750 -p ${PREFIX}/SSL
-	install -m 750 SSL/Makefile ${PREFIX}/SSL
+	install -m 750 ssl/Makefile ${PREFIX}/SSL
 	mkdir -m 750 -p ${PREFIX}/assets
 	rsync -rupE assets ${PREFIX}
 	find ${PREFIX}/assets -type f -exec chmod 640 {} \;
@@ -33,3 +30,5 @@ install: server
 
 uninstall:
 	rm -rf ${PREFIX}
+
+.PHONY: server
