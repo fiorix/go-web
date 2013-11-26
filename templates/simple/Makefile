@@ -7,7 +7,7 @@ PREFIX=/opt/%name%
 all: server
 
 deps:
-	make -C deps src
+	make -C src deps
 
 server:
 	make -C src
