@@ -1,5 +1,8 @@
 # %template%
 
+**IMPORTANT**: This template needs to be updated. Please don't use it.
+
+
 Admin panel template written in Go, with AngularJS and Twitter Bootstrap.
 
 It requires MySQL and Redis for storage, and an SMTP server for sending emails
