@@ -1,0 +1,32 @@
+{{define "content"}}
+<div class="container">
+	<div class="masthead">
+		<ul class="nav nav-pills pull-right">
+			<li><a href="../">Home</a></li>
+			<li><a href="../signup/">Sign up</a></li>
+		</ul>
+		<h3 class="muted">%template%</h3>
+	</div>
+	<hr>
+	<form class="single-page-form" method="POST" action="">
+		<h2 class="single-page-form-heading">Sign in</h2>
+		<input type="text" class="form-control" name="Email" value="{{.Email}}" placeholder="Email" autocapitalize="off" autofocus>
+		<input type="password" class="form-control" name="Passwd" placeholder="Password">
+		{{if .Failed}}
+		<div class="alert alert-danger">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			Invalid email or password.
+		</div>
+		{{end}}
+		<label class="checkbox">
+			<input type="checkbox" name="RememberMe" {{.RememberMe}}> Remember me
+		</label>
+		<button class="btn btn-primary">Sign in</button>
+		<a style="margin-left:10px" href="../recovery/"><small>Forgot your password?</small></a>
+	</form>
+	<hr>
+	<div class="footer">
+		<p>&copy; 2013 %template%</p>
+	</div>
+</div> <!-- /container -->
+{{end}}

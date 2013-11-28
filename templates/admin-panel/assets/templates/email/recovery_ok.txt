@@ -1,4 +1,4 @@
-To: {{.Email}}
+{{define "recovery_ok"}}To: {{.Email}}
 Subject: Account Recovery Complete
 
 Your password has been successfully changed.
@@ -7,3 +7,4 @@ Your password has been successfully changed.
 
 --
 Requested by IP {{.IP}}
+{{end}}

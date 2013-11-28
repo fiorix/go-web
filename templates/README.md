@@ -17,8 +17,8 @@ Just make a copy of the template and run its `bootstrap.sh` script.
 
 Example:
 
-	cp -r simple my-project
-	cd my-project
+	cp -r simple foobar
+	cd foobar
 	./bootstrap.sh
 
 Install dependencies:
@@ -28,6 +28,6 @@ Install dependencies:
 Compile and run the server:
 
 	make clean all
-	./server
+	./foobar
 
 Each template has its own README.md with more details.

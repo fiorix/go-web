@@ -15,6 +15,12 @@ type ConfigData struct {
 	Debug        bool   `toml:"debug"`
 	TemplatesDir string `toml:"templates_dir"`
 	DocumentRoot string `toml:"document_root"`
+	InviteOnly   bool   `toml:"invite_only"`
+
+	Session struct {
+		AuthKey  string `toml:"auth_key"`
+		CryptKey string `toml:"crypt_key"`
+	} `toml:"session"`
 
 	DB struct {
 		MySQL string `toml:"mysql"`
@@ -31,6 +37,15 @@ type ConfigData struct {
 		CertFile string `toml:"cert_file"`
 		KeyFile  string `toml:"key_file"`
 	} `toml:"https_server"`
+
+	Email struct {
+		Addr    string `toml:"smtp_addr"`
+		From    string `toml:"from"`
+		ReplyTo string `toml:"reply_to"`
+		User    string `toml:"plainauth_user"`
+		Passwd  string `toml:"plainauth_passwd"`
+		Host    string `toml:"plainauth_host"`
+	} `toml:"email_client"`
 }
 
 // LoadConfig reads and parses the configuration file.

@@ -1,0 +1,62 @@
+{{define "content"}}
+<div class="container">
+	<div class="masthead">
+		<ul class="nav nav-pills pull-right">
+			<li><a href="../">Home</a></li>
+			<li><a href="../login/">Sign in</a></li>
+		</ul>
+		<h3 class="muted">%template%</h3>
+	</div>
+	<hr>
+	<form class="single-page-form" method="POST" action="">
+		<h2 class="single-page-form-heading">Sign up</h2>
+		<input type="text" class="form-control" name="Email" value="{{.Email}}" placeholder="Email" autocapitalize="off" autofocus>
+		{{if .InvalidEmail}}
+		<div class="alert alert-danger alert-dismissable">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			Invalid email.
+		</div>
+		{{end}}
+		{{if .UserExists}}
+		<div class="alert alert-danger alert-dismissable">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			Email already registered.
+		</div>
+		{{end}}
+		{{if .AwaitingConfirmation}}
+		<div class="alert alert-danger alert-dismissable">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			Awaiting confirmation, please check your inbox and spam folders.
+		</div>
+		{{end}}
+		<hr>
+		{{if .InviteOnly}}
+			<div class="form-inline">
+				<p class="muted">Only invited people can sign up.</p>
+				<input type="text" class="form-control" name="InviteCode" value="{{.InviteCode}}" placeholder="Invite code">
+			</div>
+			{{if .InvalidInviteCode}}
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				Ooops, this is not the invite code.
+			</div>
+			{{end}}
+			<hr>
+		{{end}}
+		<label class="checkbox">
+			<input type="checkbox" name="TOS" {{.TOS}}> I agree with the <a href="legal.html">Terms of Service</a>
+		</label>
+		{{if .UncheckedTOS}}
+		<div class="alert alert-danger alert-dismissable">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+			Please accept the Terms of Service.
+		</div>
+		{{end}}
+		<button class="btn btn-primary">Sign up</button>
+	</form>
+	<hr>
+	<div class="footer">
+		<p>&copy; 2013 %template%</p>
+	</div>
+</div> <!-- /container -->
+{{end}}

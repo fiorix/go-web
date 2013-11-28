@@ -1,4 +1,4 @@
-# %name%
+# Project template
 
 Simple web server template with pre-configured MySQL and Redis.
 
@@ -13,11 +13,11 @@ Prerequisites:
 
 First, you should make a copy of this directory, and prepare the new project:
 
-	cp -r simple bozo
-	cd bozo
+	cp -r simple foobar
+	cd foobar
 	./bootstrap.sh
 
-Your project is now called **bozo** and is ready to use.
+Your project is now called **foobar** and is ready to use.
 
 Make sure the Go compiler is installed and `$GOPATH` is set.
 
@@ -38,8 +38,8 @@ Start Redis if you plan to use it, and set up MySQL (both optional):
 
 Edit the config file and run the server (check MySQL and Redis settings):
 
-	vi %name%.conf
-	./%name%
+	vi foobar.conf
+	./foobar
 
 Install, uninstall. Edit Makefile and set PREFIX to the target directory:
 
@@ -48,6 +48,6 @@ Install, uninstall. Edit Makefile and set PREFIX to the target directory:
 
 Allow non-root process to listen on low ports:
 
-	/sbin/setcap 'cap_net_bind_service=+ep' /opt/bozo/server
+	/sbin/setcap 'cap_net_bind_service=+ep' /opt/foobar/server
 
 Good luck!

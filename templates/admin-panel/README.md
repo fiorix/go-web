@@ -1,61 +1,45 @@
-# %template%
+# Project template
 
-**IMPORTANT**: This template needs to be updated. Please don't use it.
+Simple web server template with pre-configured MySQL and Redis.
 
+## Preparing the environment
 
-Admin panel template written in Go, with AngularJS and Twitter Bootstrap.
-
-It requires MySQL and Redis for storage, and an SMTP server for sending emails
-for sign up, and account recovery (to reset lost passwords).
-
-## Prerequisites
-
-For building the application, it is required to have the following software:
+Prerequisites:
 
 - Git
 - rsync
 - GNU Make
 - [Go](http://golang.org) 1.0.3 or newer
-- [Closure-compiler](https://developers.google.com/closure/compiler/)
-- [YUIcompressor](http://yui.github.io/yuicompressor/)
 
-## Preparing the environment
+First, you should make a copy of this directory, and prepare the new project:
 
-A few steps are required before you can use it.
-
-First, you should make a copy of this directory, and prepare your new
-project:
-
-	cp -r admin-template bozo
-	cd bozo
+	cp -r simple foobar
+	cd foobar
 	./bootstrap.sh
 
-Your project is now called **bozo**, and you're ready to continue the
-following steps.
+Your project is now called **foobar** and is ready to use.
 
-Make sure the Go compiler is installed and ``$GOPATH`` is set.
+Make sure the Go compiler is installed and `$GOPATH` is set.
 
-Install dependencies:
+Install dependencies, and compile:
 
 	make deps
-
-Compile the server, minify and compress JS and CSS:
-
-	make clean all
+	make clean
+	make all
 
 Generate a self-signed SSL certificate (optional):
 
-	cd SSL
+	cd ssl
 	make
 
-Make sure Redis is running. Set up MySQL:
+Start Redis if you plan to use it, and set up MySQL (both optional):
 
 	sudo mysql < assets/files/database.sql
 
-Edit the config and run the dev server (check MySQL and Redis settings):
+Edit the config file and run the server (check MySQL and Redis settings):
 
-	vi server.conf
-	./server
+	vi foobar.conf
+	./foobar
 
 Install, uninstall. Edit Makefile and set PREFIX to the target directory:
 
@@ -64,6 +48,6 @@ Install, uninstall. Edit Makefile and set PREFIX to the target directory:
 
 Allow non-root process to listen on low ports:
 
-	/sbin/setcap 'cap_net_bind_service=+ep' /opt/bozo/server
+	/sbin/setcap 'cap_net_bind_service=+ep' /opt/foobar/server
 
 Good luck!

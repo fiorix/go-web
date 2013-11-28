@@ -28,17 +28,6 @@ var (
 	Redis *redis.Client
 )
 
-func hello() {
-	var cpuinfo string
-	if n := runtime.NumCPU(); n > 1 {
-		runtime.GOMAXPROCS(n)
-		cpuinfo = fmt.Sprintf("%d CPUs", n)
-	} else {
-		cpuinfo = "1 CPU"
-	}
-	log.Printf("%s v%s (%s)", APPNAME, VERSION, cpuinfo)
-}
-
 func main() {
 	cfgfile := flag.String("c", "%name%.conf", "set config file")
 	flag.Usage = func() {
@@ -60,11 +49,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Print server info and set up HTTP routes.
-	hello()
-	RouteHTTP()
+	// Set GOMAXPROCS and show server info.
+	var cpuinfo string
+	if n := runtime.NumCPU(); n > 1 {
+		runtime.GOMAXPROCS(n)
+		cpuinfo = fmt.Sprintf("%d CPUs", n)
+	} else {
+		cpuinfo = "1 CPU"
+	}
+	log.Printf("%s v%s (%s)", APPNAME, VERSION, cpuinfo)
 
-	// Run HTTP and HTTPS servers.
+	// Add routes, and run HTTP and HTTPS servers.
+	RouteHTTP()
 	wg := &sync.WaitGroup{}
 	if cfg.HTTP.Addr != "" {
 		wg.Add(1)

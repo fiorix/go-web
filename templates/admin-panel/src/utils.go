@@ -1,4 +1,4 @@
-// Copyright 2013 %template% authors.  All rights reserved.
+// Copyright 2013 %name% authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,10 +14,7 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/smtp"
 	"os"
-
-	"github.com/gorilla/sessions"
 )
 
 // remoteIP returns the remote IP without the port number.
@@ -30,7 +27,7 @@ func remoteIP(r *http.Request) string {
 	return "" // Go1.0
 }
 
-// serverURL returns the URL of the server based on the current request.
+// serverURL returns the base URL of the server based on the current request.
 func serverURL(r *http.Request, preferSSL bool) string {
 	var (
 		addr  string
@@ -38,12 +35,12 @@ func serverURL(r *http.Request, preferSSL bool) string {
 		port  string
 		proto string
 	)
-	if Config.HTTPS.Addr == "" || !preferSSL {
+	if cfg.HTTPS.Addr == "" || !preferSSL {
 		proto = "http"
-		addr = Config.HTTP.Addr
+		addr = cfg.HTTP.Addr
 	} else {
 		proto = "https"
-		addr = Config.HTTPS.Addr
+		addr = cfg.HTTPS.Addr
 	}
 	for i := len(addr) - 1; i >= 0; i-- {
 		if addr[i] == ':' {
@@ -66,43 +63,8 @@ func serverURL(r *http.Request, preferSSL bool) string {
 	return fmt.Sprintf("%s://%s/", proto, host)
 }
 
-// nocsrf protects against csrf or xsrf attacks.
-func nocsrf(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("X-Requested-With") == "" {
-			http.NotFound(w, r)
-		} else {
-			fn(w, r)
-		}
-	}
-}
-
-type AuthHandlerFunc func(http.ResponseWriter, *http.Request, *sessions.Session)
-
-// authenticated is a wrapper for HandlerFunc functions that automatically
-// checks the (cookie) session. If there's no session available then the
-// request is automatically redirected to the sign in page.
-func authenticated(fn AuthHandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		s, err := Session.Get(r, "s")
-		if s == nil || s.Values["Id"] == nil || err != nil {
-			http.Redirect(w, r, "/signin.html", 302)
-			return
-		}
-		fn(w, r, s)
-	}
-}
-
-// UserFS is an http.FileServer for authenticated sessions only.
-func UserFS(dir string) AuthHandlerFunc {
-	fs := http.FileServer(http.Dir(Config.UsersDocumentRoot))
-	return func(w http.ResponseWriter, r *http.Request, s *sessions.Session) {
-		fs.ServeHTTP(w, r)
-	}
-}
-
-// httpError renders the default error message to the http client based on
-// the code, and prints the program error to the log.
+// httpError renders the default error message based on
+// the status code, and prints the program error to the log.
 func httpError(w http.ResponseWriter, code int, msg ...interface{}) {
 	http.Error(w, http.StatusText(code), code)
 	if msg != nil && len(msg) >= 1 {
@@ -115,6 +77,27 @@ func httpError(w http.ResponseWriter, code int, msg ...interface{}) {
 			log.Println("Error", msg)
 		}
 	}
+}
+
+// NewJSON encodes `d` as JSON and writes it to the http connection.
+func NewJSON(w http.ResponseWriter, d interface{}) error {
+	b, err := json.Marshal(d)
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_, err = io.Copy(w, bytes.NewReader(b))
+	return err
+}
+
+// JSON reads the HTTP request body and parses it as JSON.
+func JSON(r *http.Request, v interface{}) error {
+	// TODO: check mime type first?
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, &v)
 }
 
 // RandHex generates random hex sequences.
@@ -131,41 +114,4 @@ func RandHex(nbytes int) string {
 		log.Fatal(err)
 	}
 	return hex.EncodeToString(bytes)
-}
-
-// SendMail sends an email to the pre-configured SMTP server.
-// TODO: Fix the time out.
-// If the SMTP server is unreachable SendMail takes a long time to return.
-// In the real world sendMail should just drop the msg into a queue.
-func SendMail(to []string, msg []byte) error {
-	return smtp.SendMail(
-		Config.SMTP.Addr,
-		smtp.PlainAuth(
-			"", // Identity
-			Config.SMTP.PlainAuth.User,
-			Config.SMTP.PlainAuth.Passwd,
-			Config.SMTP.PlainAuth.Host),
-		Config.SMTP.From,
-		to, msg)
-}
-
-// JSON encodes a message as JSON and writes to the socket.
-func JSON(w http.ResponseWriter, d interface{}) error {
-	b, err := json.Marshal(d)
-	if err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json")
-	_, err = io.Copy(w, bytes.NewReader(b))
-	return err
-}
-
-// ParseJSON reads an HTTP request body and parses its JSON content.
-func ParseJSON(r *http.Request, v interface{}) error {
-	// TODO: check mime type first?
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(b, &v)
 }

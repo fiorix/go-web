@@ -1,4 +1,4 @@
-To: {{.Email}}
+{{define "hello"}}To: {{.Email}}
 Subject: Welcome!
 
 Your account has been created and is active!
@@ -7,3 +7,4 @@ Your account has been created and is active!
 
 --
 Requested by IP {{.IP}}
+{{end}}

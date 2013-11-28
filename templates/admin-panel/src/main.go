@@ -1,4 +1,4 @@
-// Copyright 2013 %template% authors.  All rights reserved.
+// Copyright 2013 %name% authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,50 +10,70 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"runtime"
 	"sync"
-	"text/template"
-	"time"
 
 	"github.com/fiorix/go-redis/redis"
-	"github.com/fiorix/go-web/httpxtra"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 const (
 	VERSION = "1.0"
-	APPNAME = "%template%"
+	APPNAME = "%name%"
 )
 
 var (
-	Config  *ConfigData
-	MySQL   *sql.DB
-	Redis   *redis.Client
-	Tmpl    *template.Template
-	Session sessions.Store
+	cfg          *ConfigData
+	MySQL        *sql.DB
+	Redis        *redis.Client
+	Session      sessions.Store
+	DocumentRoot http.Handler
 )
 
-func route() {
-	// Public handlers
-	http.Handle("/", http.FileServer(http.Dir(Config.DocumentRoot)))
-	http.HandleFunc("/signup.json", nocsrf(SignupHandler))
-	http.HandleFunc("/signup-confirm.json", nocsrf(SignupConfirmHandler))
-	http.HandleFunc("/signin.json", nocsrf(SigninHandler))
-	http.HandleFunc("/signout/", SignoutHandler)
-	http.HandleFunc("/recovery.json", nocsrf(RecoveryHandler))
-	http.HandleFunc("/recovery-confirm.json", nocsrf(RecoveryConfirmHandler))
+func main() {
+	cfgfile := flag.String("c", "%name%.conf", "")
+	keygen := flag.Bool("k", false, "")
+	flag.Usage = func() {
+		fmt.Println("Usage: %name% [-k] [-c %name%.conf]")
+		os.Exit(1)
+	}
 
-	// Private handlers (only for authenticated users)
-	http.Handle("/u/", http.StripPrefix("/u/",
-		authenticated(UserFS(Config.UsersDocumentRoot))))
-	http.HandleFunc("/u/index.json",
-		nocsrf(authenticated(UserIndexHandler)))
-	http.HandleFunc("/u/settings.json",
-		nocsrf(authenticated(UserSettingsHandler)))
-}
+	flag.Parse()
 
-func hello() {
+	if *keygen {
+		fmt.Println(RandHex(16))
+		return
+	}
+
+	var err error
+	cfg, err = LoadConfig(*cfgfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Set up databases.
+	Redis = redis.New(cfg.DB.Redis)
+	MySQL, err = sql.Open("mysql", cfg.DB.MySQL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Load HTML and plain text templates.
+	LoadTemplates()
+
+	// Set up session keys
+	Session = sessions.NewCookieStore(
+		[]byte(cfg.Session.AuthKey),
+		[]byte(cfg.Session.CryptKey),
+	)
+
+	// Public html.
+	DocumentRoot = http.FileServer(http.Dir(cfg.DocumentRoot))
+
+	// Set GOMAXPROCS and show server info.
 	var cpuinfo string
 	if n := runtime.NumCPU(); n > 1 {
 		runtime.GOMAXPROCS(n)
@@ -61,79 +81,21 @@ func hello() {
 	} else {
 		cpuinfo = "1 CPU"
 	}
-	log.Printf("%s v%s (%s)", APPNAME, VERSION, cpuinfo)
-}
 
-func main() {
-	var err error
-	cfgfile := flag.String("config", "server.conf", "set config file")
-	sessKey := flag.Bool("keygen", false, "dump random key and exit")
-	flag.Parse()
-	if *sessKey {
-		fmt.Println(RandHex(16))
-		return
-	}
-	Config, err = ReadConfig(*cfgfile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Load templates
-	Tmpl = template.Must(template.ParseGlob(Config.TemplatesDirectory))
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Set up databases
-	Redis = redis.New(Config.Redis)
-	MySQL, err = sql.Open("mysql", Config.MySQL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Set up session keys
-	Session = sessions.NewCookieStore(
-		Config.Session.AuthKey, Config.Session.CryptKey)
-	// Set up routing and print server info
-	route()
-	hello()
-	// Run HTTP and HTTPS servers
+	log.Printf("%s v%s (%s)", APPNAME, VERSION, cpuinfo)
+
+	// Start email delivery goroutine.
+	go DeliverEmail()
+
+	// Run HTTP and HTTPS servers.
 	wg := &sync.WaitGroup{}
-	if Config.HTTP.Addr != "" {
+	if cfg.HTTP.Addr != "" {
 		wg.Add(1)
-		log.Printf("Starting HTTP server on %s", Config.HTTP.Addr)
-		go func() {
-			// Use httpxtra's listener to support Unix sockets.
-			server := http.Server{
-				Addr: Config.HTTP.Addr,
-				Handler: httpxtra.Handler{
-					Logger:   logger,
-					XHeaders: Config.HTTP.XHeaders,
-				},
-			}
-			log.Fatal(httpxtra.ListenAndServe(server))
-			//wg.Done()
-		}()
+		go ListenHTTP()
 	}
-	if Config.HTTPS.Addr != "" {
+	if cfg.HTTPS.Addr != "" {
 		wg.Add(1)
-		log.Printf("Starting HTTPS server on %s", Config.HTTPS.Addr)
-		go func() {
-			server := http.Server{
-				Addr:    Config.HTTPS.Addr,
-				Handler: httpxtra.Handler{Logger: logger},
-			}
-			log.Fatal(server.ListenAndServeTLS(
-				Config.HTTPS.CrtFile, Config.HTTPS.KeyFile))
-			//wg.Done()
-		}()
+		go ListenHTTPS()
 	}
 	wg.Wait()
-}
-
-func logger(r *http.Request, created time.Time, status, bytes int) {
-	//fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
-	log.Printf("HTTP %d %s %s (%s) :: %s",
-		status,
-		r.Method,
-		r.URL.Path,
-		r.RemoteAddr,
-		time.Since(created))
 }
