@@ -5,7 +5,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
@@ -35,13 +34,8 @@ type ConfigData struct {
 
 // LoadConfig reads and parses the configuration file.
 func LoadConfig(filename string) (*ConfigData, error) {
-	buf, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
 	c := &ConfigData{}
-	if _, err := toml.Decode(string(buf), c); err != nil {
+	if _, err := toml.DecodeFile(filename, c); err != nil {
 		return nil, err
 	}
 
