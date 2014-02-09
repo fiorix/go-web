@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 )
@@ -33,12 +32,12 @@ func serverURL(r *http.Request, preferSSL bool) string {
 		port  string
 		proto string
 	)
-	if cfg.HTTPS.Addr == "" || !preferSSL {
+	if Config.HTTPS.Addr == "" || !preferSSL {
 		proto = "http"
-		addr = cfg.HTTP.Addr
+		addr = Config.HTTP.Addr
 	} else {
 		proto = "https"
-		addr = cfg.HTTPS.Addr
+		addr = Config.HTTPS.Addr
 	}
 	for i := len(addr) - 1; i >= 0; i-- {
 		if addr[i] == ':' {
@@ -58,23 +57,7 @@ func serverURL(r *http.Request, preferSSL bool) string {
 			host += ":" + port
 		}
 	}
-	return fmt.Sprintf("%s://%s/", proto, host)
-}
-
-// httpError renders the default error message based on
-// the status code, and prints the program error to the log.
-func httpError(w http.ResponseWriter, code int, msg ...interface{}) {
-	http.Error(w, http.StatusText(code), code)
-	if msg != nil && len(msg) >= 1 {
-		switch msg[0].(type) {
-		case string:
-			log.Printf(msg[0].(string), msg[1:]...)
-		case nil:
-			// ignore
-		default:
-			log.Println("Error", msg)
-		}
-	}
+	return fmt.Sprintf("%s://%s", proto, host)
 }
 
 // NewJSON encodes `d` as JSON and writes it to the http connection.

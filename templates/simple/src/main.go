@@ -13,6 +13,9 @@ import (
 	"runtime"
 	"sync"
 
+	html "html/template"
+	text "text/template"
+
 	"github.com/fiorix/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -23,13 +26,19 @@ const (
 )
 
 var (
-	cfg   *ConfigData
+	Config *ConfigData
+
+	// Templates
+	HTML *html.Template
+	TEXT *text.Template
+
+	// DBs
 	MySQL *sql.DB
 	Redis *redis.Client
 )
 
 func main() {
-	cfgfile := flag.String("c", "%name%.conf", "set config file")
+	Configfile := flag.String("c", "%name%.conf", "set config file")
 	flag.Usage = func() {
 		fmt.Println("Usage: %name% [-c %name%.conf]")
 		os.Exit(1)
@@ -37,14 +46,18 @@ func main() {
 	flag.Parse()
 
 	var err error
-	cfg, err = LoadConfig(*cfgfile)
+	Config, err = LoadConfig(*Configfile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Parse templates.
+	HTML = html.Must(html.ParseGlob(Config.TemplatesDir + "/*.html"))
+	TEXT = text.Must(text.ParseGlob(Config.TemplatesDir + "/*.txt"))
+
 	// Set up databases.
-	Redis = redis.New(cfg.DB.Redis)
-	MySQL, err = sql.Open("mysql", cfg.DB.MySQL)
+	Redis = redis.New(Config.DB.Redis)
+	MySQL, err = sql.Open("mysql", Config.DB.MySQL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,11 +75,11 @@ func main() {
 	// Add routes, and run HTTP and HTTPS servers.
 	RouteHTTP()
 	wg := &sync.WaitGroup{}
-	if cfg.HTTP.Addr != "" {
+	if Config.HTTP.Addr != "" {
 		wg.Add(1)
 		go ListenHTTP()
 	}
-	if cfg.HTTPS.Addr != "" {
+	if Config.HTTPS.Addr != "" {
 		wg.Add(1)
 		go ListenHTTPS()
 	}

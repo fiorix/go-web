@@ -9,16 +9,19 @@ import (
 	"net/http"
 )
 
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "hello, world\r\n")
+}
+
 func TestHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Run this on the command line:
 	// redis-cli set foo bar
 
 	if bar, err := Redis.Get("foo"); err != nil {
-		httpError(w, 503, "Redis: "+err.Error())
+		httpError(w, r, 503, "Redis: "+err.Error())
 		return
 	} else {
-		fmt.Fprintln(w, "foo:", bar)
+		fmt.Fprintf(w, "foo:%s\r\n", bar)
 	}
-
 }
