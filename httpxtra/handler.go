@@ -21,6 +21,15 @@ type Handler struct {
 	XHeaders bool
 }
 
+// ServeHTTP is a wrapper for the request, which can modify the value
+// of the RemoteAddr and later calls the logger function.
+//
+// Note that when XHeaders are enabled, the value of RemoteAddr might
+// be a copy of the X-Real-IP or X-Forwarded-For HTTP header, which can
+// be a comma separated list of IPs.
+//
+// See http://httpd.apache.org/docs/2.2/mod/mod_proxy.html#x-headers for
+// details.
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 	lw := logWriter{w: w}
