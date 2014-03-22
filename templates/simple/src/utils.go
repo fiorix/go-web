@@ -68,7 +68,7 @@ func WriteJSON(w http.ResponseWriter, d interface{}) error {
 	return enc.Encode(d)
 }
 
-// JSON reads the HTTP request body and parses it as JSON.
+// ReadJSON reads the HTTP request body and parses it as JSON.
 func ReadJSON(r *http.Request, v interface{}) error {
 	// TODO: check mime type first?
 	dec := json.NewDecoder(r.Body)
