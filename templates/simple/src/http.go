@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/context"
 )
 
-func RouteHTTP() {
+func routeHTTP() {
 	// Static file server.
 	http.Handle("/static/", http.FileServer(http.Dir(Config.DocumentRoot)))
 
@@ -22,7 +22,7 @@ func RouteHTTP() {
 	http.HandleFunc("/test", TestHandler)
 }
 
-func ListenHTTP() {
+func listenHTTP() {
 	s := http.Server{
 		Addr:    Config.HTTP.Addr,
 		Handler: httpxtra.Handler{Logger: httpLogger},
@@ -31,7 +31,7 @@ func ListenHTTP() {
 	log.Fatal(s.ListenAndServe())
 }
 
-func ListenHTTPS() {
+func listenHTTPS() {
 	s := http.Server{
 		Addr:    Config.HTTPS.Addr,
 		Handler: httpxtra.Handler{Logger: httpLogger},

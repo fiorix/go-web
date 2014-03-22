@@ -72,12 +72,12 @@ func main() {
 	log.Printf("%s v%s (%s)", APPNAME, VERSION, cpuinfo)
 
 	// Add routes, and run HTTP and HTTPS servers.
-	RouteHTTP()
+	routeHTTP()
 	if Config.HTTP.Addr != "" {
-		go ListenHTTP()
+		go listenHTTP()
 	}
 	if Config.HTTPS.Addr != "" {
-		go ListenHTTPS()
+		go listenHTTPS()
 	}
 	select {}
 }

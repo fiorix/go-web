@@ -61,15 +61,15 @@ func serverURL(r *http.Request, preferSSL bool) string {
 	return fmt.Sprintf("%s://%s", proto, host)
 }
 
-// WriteJSON encodes `d` as JSON and writes it to the http connection.
-func WriteJSON(w http.ResponseWriter, d interface{}) error {
+// writeJSON encodes `d` as JSON and writes it to the http connection.
+func writeJSON(w http.ResponseWriter, d interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
 	enc := json.NewEncoder(w)
 	return enc.Encode(d)
 }
 
-// ReadJSON reads the HTTP request body and parses it as JSON.
-func ReadJSON(r *http.Request, v interface{}) error {
+// readJSON reads the HTTP request body and parses it as JSON.
+func readJSON(r *http.Request, v interface{}) error {
 	// TODO: check mime type first?
 	dec := json.NewDecoder(r.Body)
 	return dec.Decode(v)

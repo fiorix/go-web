@@ -15,6 +15,7 @@ server:
 
 clean:
 	make -C src clean
+	@rm -f %name%
 
 install: server
 	mkdir -m 750 -p ${PREFIX}
