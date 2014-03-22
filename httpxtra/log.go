@@ -47,6 +47,10 @@ func (lw *logWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	return lw.w.(http.Hijacker).Hijack()
 }
 
+func (lw *logWriter) CloseNotify() <-chan bool {
+	return lw.w.(http.CloseNotifier).CloseNotify()
+}
+
 // ApacheCommonLog returns an Apache Common access log string.
 func ApacheCommonLog(r *http.Request, created time.Time, status, bytes int) string {
 	u := "-"
