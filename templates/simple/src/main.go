@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"sync"
 
 	html "html/template"
 	text "text/template"
@@ -74,14 +73,11 @@ func main() {
 
 	// Add routes, and run HTTP and HTTPS servers.
 	RouteHTTP()
-	wg := &sync.WaitGroup{}
 	if Config.HTTP.Addr != "" {
-		wg.Add(1)
 		go ListenHTTP()
 	}
 	if Config.HTTPS.Addr != "" {
-		wg.Add(1)
 		go ListenHTTPS()
 	}
-	wg.Wait()
+	select {}
 }
