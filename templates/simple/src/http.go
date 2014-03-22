@@ -71,12 +71,13 @@ func httpLogger(r *http.Request, created time.Time, status, bytes int) {
 		info = "(" + tmp.(string) + ")"
 	}
 
-	log.Printf("%s %d %s %q (%s) :: %s %s",
+	log.Printf("%s %d %s %q (%s) :: %d bytes in %s %s",
 		proto,
 		status,
 		r.Method,
 		r.URL.Path,
 		remoteIP(r),
+		bytes,
 		time.Since(created),
 		info,
 	)
