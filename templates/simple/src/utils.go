@@ -1,27 +1,28 @@
-// Copyright 2013 %name% authors.  All rights reserved.
+// Copyright 2013-2014 %name% authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
+	"strings"
 )
 
 // remoteIP returns the remote IP without the port number.
 func remoteIP(r *http.Request) string {
 	if ip, _, err := net.SplitHostPort(r.RemoteAddr); err != nil {
-		return r.RemoteAddr // xheaders?
+		// If xheaders is enabled, RemoteAddr might be a copy of
+		// the X-Real-IP or X-Forwarded-For HTTP headers, which
+		// can be a comma separated list of IPs. In this case,
+		// only the first IP in the list is used.
+		return strings.SplitN(r.RemoteAddr, ",", 2)[0]
 	} else {
 		return ip
 	}
-	return "" // Go1.0
 }
 
 // serverURL returns the base URL of the server based on the current request.
@@ -60,23 +61,16 @@ func serverURL(r *http.Request, preferSSL bool) string {
 	return fmt.Sprintf("%s://%s", proto, host)
 }
 
-// NewJSON encodes `d` as JSON and writes it to the http connection.
-func NewJSON(w http.ResponseWriter, d interface{}) error {
-	b, err := json.Marshal(d)
-	if err != nil {
-		return err
-	}
+// WriteJSON encodes `d` as JSON and writes it to the http connection.
+func WriteJSON(w http.ResponseWriter, d interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
-	_, err = io.Copy(w, bytes.NewReader(b))
-	return err
+	enc := json.NewEncoder(w)
+	return enc.Encode(d)
 }
 
 // JSON reads the HTTP request body and parses it as JSON.
-func JSON(r *http.Request, v interface{}) error {
+func ReadJSON(r *http.Request, v interface{}) error {
 	// TODO: check mime type first?
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(b, &v)
+	dec := json.NewDecoder(r.Body)
+	return dec.Decode(v)
 }
