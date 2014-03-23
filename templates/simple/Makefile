@@ -22,7 +22,7 @@ install: server
 	install -m 750 %name% ${PREFIX}/server
 	install -m 640 %name%.conf ${PREFIX}
 	mkdir -m 750 -p ${PREFIX}/SSL
-	install -m 750 ssl/Makefile ${PREFIX}/SSL
+	install -m 750 ssl/Makefile ${PREFIX}/ssl
 	mkdir -m 750 -p ${PREFIX}/assets
 	rsync -rupE assets ${PREFIX}
 	find ${PREFIX}/assets -type f -exec chmod 640 {} \;
