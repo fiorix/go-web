@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 
 	html "html/template"
 	text "text/template"
@@ -37,17 +39,23 @@ var (
 )
 
 func main() {
-	Configfile := flag.String("c", "%name%.conf", "set config file")
+	configFile := flag.String("c", "%name%.conf", "")
+	logFile := flag.String("logfile", "", "")
 	flag.Usage = func() {
-		fmt.Println("Usage: %name% [-c %name%.conf]")
+		fmt.Println("Usage: %name% [-c %name%.conf] [-logfile FILE]")
 		os.Exit(1)
 	}
 	flag.Parse()
 
 	var err error
-	Config, err = LoadConfig(*Configfile)
+	Config, err = LoadConfig(*configFile)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Initialize log
+	if *logFile != "" {
+		setLog(*logFile)
 	}
 
 	// Parse templates.
@@ -80,4 +88,31 @@ func main() {
 		go listenHTTPS()
 	}
 	select {}
+}
+
+func setLog(filename string) {
+	f := openLog(filename)
+	log.SetOutput(f)
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc, syscall.SIGHUP)
+	go func() {
+		// Recycle log file on SIGHUP.
+		<-sigc
+		f.Close()
+		f = openLog(filename)
+		log.SetOutput(f)
+	}()
+}
+
+func openLog(filename string) *os.File {
+	f, err := os.OpenFile(
+		filename,
+		os.O_WRONLY|os.O_CREATE|os.O_APPEND,
+		0666,
+	)
+	if err != nil {
+		log.SetOutput(os.Stderr)
+		log.Fatal(err)
+	}
+	return f
 }
