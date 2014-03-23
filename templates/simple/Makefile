@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-PREFIX=/opt/%name%
+TARGET=$(DESTDIR)/opt/%name%
 
 all: server
 
@@ -18,18 +18,18 @@ clean:
 	@rm -f %name%
 
 install: server
-	install -m 750 -d ${PREFIX}
-	install -m 750 %name% ${PREFIX}/server
-	install -m 640 %name%.conf ${PREFIX}
-	install -m 750 -d ${PREFIX}/ssl
-	install -m 640 ssl/Makefile ${PREFIX}/ssl
-	install -m 750 -d ${PREFIX}/assets
-	rsync -rupE assets ${PREFIX}
-	find ${PREFIX}/assets -type f -exec chmod 640 {} \;
-	find ${PREFIX}/assets -type d -exec chmod 750 {} \;
-	#chown -R www-data: ${PREFIX}
+	install -m 750 -d $(TARGET)
+	install -m 750 %name% $(TARGET)/server
+	install -m 640 %name%.conf $(TARGET)
+	install -m 750 -d $(TARGET)/ssl
+	install -m 640 ssl/Makefile $(TARGET)/ssl
+	install -m 750 -d $(TARGET)/assets
+	rsync -rupE assets $(TARGET)
+	find $(TARGET)/assets -type f -exec chmod 640 {} \;
+	find $(TARGET)/assets -type d -exec chmod 750 {} \;
+	#chown -R www-data: $(TARGET)
 
 uninstall:
-	rm -rf ${PREFIX}
+	rm -rf $(TARGET)
 
 .PHONY: server
