@@ -39,6 +39,10 @@ func (lw *logWriter) WriteHeader(s int) {
 	lw.status = s
 }
 
+func (lw *logWriter) Flush() {
+	lw.w.(http.Flusher).Flush()
+}
+
 func (lw *logWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	if lw.status == 0 {
 		lw.status = http.StatusOK
