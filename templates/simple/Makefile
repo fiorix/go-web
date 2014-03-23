@@ -18,12 +18,12 @@ clean:
 	@rm -f %name%
 
 install: server
-	mkdir -m 750 -p ${PREFIX}
+	install -m 750 -d ${PREFIX}
 	install -m 750 %name% ${PREFIX}/server
 	install -m 640 %name%.conf ${PREFIX}
-	mkdir -m 750 -p ${PREFIX}/SSL
+	install -m 750 -d ${PREFIX}/ssl
 	install -m 750 ssl/Makefile ${PREFIX}/ssl
-	mkdir -m 750 -p ${PREFIX}/assets
+	install -m 750 -d ${PREFIX}/assets
 	rsync -rupE assets ${PREFIX}
 	find ${PREFIX}/assets -type f -exec chmod 640 {} \;
 	find ${PREFIX}/assets -type d -exec chmod 750 {} \;
