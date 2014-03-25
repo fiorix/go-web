@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -41,25 +42,25 @@ func listenHTTPS() {
 }
 
 // httpError renders the default error message based on
-// the status code, and sets the "info" context variable with the error.
+// the status code, and sets the "log" context variable with the error.
 func httpError(w http.ResponseWriter, r *http.Request, code int, msg string) {
 	// TODO: render error page instead of text?
 	http.Error(w, http.StatusText(code), code)
 
 	if msg != "" {
-		context.Set(r, "info", msg)
+		context.Set(r, "log", msg)
 	}
 }
 
 // httpLogger is called at the end of every HTTP request. It dumps one
 // log line per request.
 //
-// The "info" context variable can be used to add extra information to
+// The "log" context variable can be used to add extra information to
 // the logging, such as database or template errors.
 func httpLogger(r *http.Request, created time.Time, status, bytes int) {
 	//fmt.Println(httpxtra.ApacheCommonLog(r, created, status, bytes))
 
-	var proto, info string
+	var proto, msg string
 
 	if r.TLS == nil {
 		proto = "HTTP"
@@ -67,12 +68,12 @@ func httpLogger(r *http.Request, created time.Time, status, bytes int) {
 		proto = "HTTPS"
 	}
 
-	if tmp := context.Get(r, "info"); tmp != nil {
-		info = "(" + tmp.(string) + ")"
+	if tmp := context.Get(r, "log"); tmp != nil {
+		msg = fmt.Sprintf(" (%s)", tmp)
 		context.Clear(r)
 	}
 
-	log.Printf("%s %d %s %q (%s) :: %d bytes in %s %s",
+	log.Printf("%s %d %s %q (%s) :: %d bytes in %s%s",
 		proto,
 		status,
 		r.Method,
@@ -80,6 +81,6 @@ func httpLogger(r *http.Request, created time.Time, status, bytes int) {
 		remoteIP(r),
 		bytes,
 		time.Since(created),
-		info,
+		msg,
 	)
 }
