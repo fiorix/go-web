@@ -97,10 +97,12 @@ func setLog(filename string) {
 	signal.Notify(sigc, syscall.SIGHUP)
 	go func() {
 		// Recycle log file on SIGHUP.
-		<-sigc
-		f.Close()
-		f = openLog(filename)
-		log.SetOutput(f)
+		for {
+			<-sigc
+			f.Close()
+			f = openLog(filename)
+			log.SetOutput(f)
+		}
 	}()
 }
 
