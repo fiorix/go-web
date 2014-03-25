@@ -69,6 +69,7 @@ func httpLogger(r *http.Request, created time.Time, status, bytes int) {
 
 	if tmp := context.Get(r, "info"); tmp != nil {
 		info = "(" + tmp.(string) + ")"
+		context.Clear(r)
 	}
 
 	log.Printf("%s %d %s %q (%s) :: %d bytes in %s %s",
