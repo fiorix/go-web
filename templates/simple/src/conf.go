@@ -1,4 +1,4 @@
-// Copyright 2013-2014 %name% authors.  All rights reserved.
+// Copyright 2014 %name% authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type ConfigData struct {
+type configFile struct {
 	Debug        bool   `toml:"debug"`
 	TemplatesDir string `toml:"templates_dir"`
 	DocumentRoot string `toml:"document_root"`
@@ -33,8 +33,8 @@ type ConfigData struct {
 }
 
 // LoadConfig reads and parses the configuration file.
-func LoadConfig(filename string) (*ConfigData, error) {
-	c := &ConfigData{}
+func loadConfig(filename string) (*configFile, error) {
+	c := &configFile{}
 	if _, err := toml.DecodeFile(filename, c); err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-// Copyright 2013-2014 %name% authors.  All rights reserved.
+// Copyright 2014 %name% authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,50 +21,42 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const (
-	VERSION = "1.0"
-	APPNAME = "%name%"
-)
-
 var (
-	Config *ConfigData
+	VERSION = "tip"
+	APPNAME = "%name%"
 
 	// Templates
 	HTML *html.Template
 	TEXT *text.Template
-
-	// DBs
-	MySQL *sql.DB
-	Redis *redis.Client
 )
 
 func main() {
 	configFile := flag.String("c", "%name%.conf", "")
-	logFile := flag.String("logfile", "", "")
+	logFile := flag.String("l", "", "")
 	flag.Usage = func() {
-		fmt.Println("Usage: %name% [-c %name%.conf] [-logfile FILE]")
+		fmt.Println("Usage: %name% [-c %name%.conf] [-l logfile]")
 		os.Exit(1)
 	}
 	flag.Parse()
 
 	var err error
-	Config, err = LoadConfig(*configFile)
+	config, err := loadConfig(*configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Initialize log
+	// Initialize log.
 	if *logFile != "" {
 		setLog(*logFile)
 	}
 
 	// Parse templates.
-	HTML = html.Must(html.ParseGlob(Config.TemplatesDir + "/*.html"))
-	TEXT = text.Must(text.ParseGlob(Config.TemplatesDir + "/*.txt"))
+	HTML = html.Must(html.ParseGlob(config.TemplatesDir + "/*.html"))
+	TEXT = text.Must(text.ParseGlob(config.TemplatesDir + "/*.txt"))
 
 	// Set up databases.
-	Redis = redis.New(Config.DB.Redis)
-	MySQL, err = sql.Open("mysql", Config.DB.MySQL)
+	rc := redis.New(config.DB.Redis)
+	db, err := sql.Open("mysql", config.DB.MySQL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -77,16 +69,15 @@ func main() {
 	} else {
 		cpuinfo = "1 CPU"
 	}
-	log.Printf("%s v%s (%s)", APPNAME, VERSION, cpuinfo)
+	log.Printf("%s %s (%s)", APPNAME, VERSION, cpuinfo)
 
-	// Add routes, and run HTTP and HTTPS servers.
-	routeHTTP()
-	if Config.HTTP.Addr != "" {
-		go listenHTTP()
-	}
-	if Config.HTTPS.Addr != "" {
-		go listenHTTPS()
-	}
+	// Start HTTP server.
+	s := new(httpServer)
+	s.init(config, rc, db)
+	go s.ListenAndServe()
+	go s.ListenAndServeTLS()
+
+	// Sleep forever.
 	select {}
 }
 
