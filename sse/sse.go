@@ -50,32 +50,32 @@ func ServeEvents(w http.ResponseWriter) (net.Conn, *bufio.ReadWriter, error) {
 	if !ok {
 		return nil, nil, ErrNoHijack
 	}
-	conn, buf, err := hj.Hijack()
-	fmt.Fprintf(conn, "HTTP/1.1 200 OK\r\n")
-	w.Header().Write(conn)
-	fmt.Fprintf(conn, "\r\n")
-	return conn, buf, err
+	conn, rw, err := hj.Hijack()
+	if err != nil {
+		return nil, nil, err
+	}
+	fmt.Fprintf(rw, "HTTP/1.1 200 OK\r\n")
+	w.Header().Write(rw)
+	fmt.Fprintf(rw, "\r\n")
+	return conn, rw, rw.Flush()
 }
 
 // SendEvent sends a push notification to the peer (usually a browser).
 // Browsers can handle these events in JavaScript:
 // http://www.w3schools.com/html/html5_serversentevents.asp
-func SendEvent(buf *bufio.ReadWriter, m *MessageEvent) (err error) {
+func SendEvent(rw *bufio.ReadWriter, m *MessageEvent) error {
 	if m.Data != "" {
-		fmt.Fprintf(buf, "data: %s\n", m.Data)
+		fmt.Fprintf(rw, "data: %s\n", m.Data)
 	}
 	if m.Event != "" {
-		fmt.Fprintf(buf, "event: %s\n", m.Event)
+		fmt.Fprintf(rw, "event: %s\n", m.Event)
 	}
 	if m.Id != "" {
-		fmt.Fprintf(buf, "id: %s\n", m.Id)
+		fmt.Fprintf(rw, "id: %s\n", m.Id)
 	}
 	if m.Retry >= 1 {
-		fmt.Fprintf(buf, "retry: %d\n", m.Retry)
+		fmt.Fprintf(rw, "retry: %d\n", m.Retry)
 	}
-	_, err = fmt.Fprintf(buf, "\n")
-	if err == nil {
-		err = buf.Flush()
-	}
-	return
+	fmt.Fprintf(rw, "\n")
+	return rw.Flush()
 }
