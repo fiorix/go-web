@@ -33,7 +33,7 @@
     }
     var source = new EventSource('/sse?' + qs);
     source.onmessage = function(ev) {
-      var data = eval('(' + ev.data + ')')
+      var data = JSON.parse(ev.data);
       document.getElementById("eventid").innerHTML = ev.lastEventId;
       document.getElementById("console").innerHTML = data.FrameBuf;
       document.getElementById("frameno").innerHTML = frameNo = data.FrameNo;
