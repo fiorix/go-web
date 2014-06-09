@@ -32,7 +32,7 @@ type Handler struct {
 // details.
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
-	lw := logWriter{w: w}
+	lw := LogWriter{ResponseWriter: w}
 	if h.Handler == nil {
 		h.Handler = http.DefaultServeMux
 	}
@@ -47,6 +47,6 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	h.Handler.ServeHTTP(&lw, r)
 	if h.Logger != nil {
-		h.Logger(r, t, lw.status, lw.bytes)
+		h.Logger(r, t, lw.Status, lw.Bytes)
 	}
 }

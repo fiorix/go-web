@@ -42,12 +42,19 @@ func SSEHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	// Play the movie, frame by frame
+	nbytes := 0
 	for n, f := range frames[sf:] {
+		nbytes += len(f.Buf)
 		m := &sse.MessageEvent{Id: strconv.Itoa(n + 1), Data: f.Buf}
-		e := sse.SendEvent(buf, m)
-		if e != nil {
-			// usually a broken pipe error
+		if err = sse.SendEvent(buf, m); err != nil {
+			// Usually a broken pipe error.
 			// log.Println(e.Error())
+
+			// We update the bytes written to the handler so
+			// logging works fine.
+			if lw, ok := w.(*httpxtra.LogWriter); ok {
+				lw.Bytes += nbytes
+			}
 			break
 		}
 		time.Sleep(f.Time)

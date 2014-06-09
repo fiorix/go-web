@@ -15,44 +15,44 @@ import (
 // LoggerFunc are functions called by httpxtra.Handler at the end of each request.
 type LoggerFunc func(r *http.Request, created time.Time, status, bytes int)
 
-type logWriter struct {
-	w      http.ResponseWriter
-	bytes  int
-	status int
+type LogWriter struct {
+	ResponseWriter http.ResponseWriter
+	Bytes          int
+	Status         int
 }
 
-func (lw *logWriter) Header() http.Header {
-	return lw.w.Header()
+func (lw *LogWriter) Header() http.Header {
+	return lw.ResponseWriter.Header()
 }
 
-func (lw *logWriter) Write(b []byte) (int, error) {
-	if lw.status == 0 {
-		lw.status = http.StatusOK
+func (lw *LogWriter) Write(b []byte) (int, error) {
+	if lw.Status == 0 {
+		lw.Status = http.StatusOK
 	}
-	n, err := lw.w.Write(b)
-	lw.bytes += n
+	n, err := lw.ResponseWriter.Write(b)
+	lw.Bytes += n
 	return n, err
 }
 
-func (lw *logWriter) WriteHeader(s int) {
-	lw.w.WriteHeader(s)
-	lw.status = s
+func (lw *LogWriter) WriteHeader(s int) {
+	lw.ResponseWriter.WriteHeader(s)
+	lw.Status = s
 }
 
-func (lw *logWriter) Flush() {
-	lw.w.(http.Flusher).Flush()
+func (lw *LogWriter) Flush() {
+	lw.ResponseWriter.(http.Flusher).Flush()
 }
 
-func (lw *logWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
-	if lw.status == 0 {
-		lw.status = http.StatusOK
+func (lw *LogWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if lw.Status == 0 {
+		lw.Status = http.StatusOK
 	}
 	// TODO: Check. Does it break if the server don't support hijacking?
-	return lw.w.(http.Hijacker).Hijack()
+	return lw.ResponseWriter.(http.Hijacker).Hijack()
 }
 
-func (lw *logWriter) CloseNotify() <-chan bool {
-	return lw.w.(http.CloseNotifier).CloseNotify()
+func (lw *LogWriter) CloseNotify() <-chan bool {
+	return lw.ResponseWriter.(http.CloseNotifier).CloseNotify()
 }
 
 // ApacheCommonLog returns an Apache Common access log string.
