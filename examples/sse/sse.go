@@ -19,14 +19,35 @@ import (
 	"time"
 
 	"github.com/fiorix/go-web/httpxtra"
-	"github.com/fiorix/go-web/sse"
 )
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
+func main() {
+	err := loadMovie("./ASCIImation.txt.gz")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	http.HandleFunc("/", mainHandler)
+	http.HandleFunc("/sse", sseHandler)
+	s := http.Server{
+		Addr:    ":8080",
+		Handler: httpxtra.Handler{Logger: logger},
+	}
+	log.Fatal(s.ListenAndServe())
+}
+
+func mainHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./index.html")
 }
 
-func SSEHandler(w http.ResponseWriter, r *http.Request) {
+func sseHandler(w http.ResponseWriter, r *http.Request) {
+	conn, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Oops", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.WriteHeader(http.StatusOK)
 	sf := 0
 	startFrame := r.FormValue("startFrame")
 	if startFrame != "" {
@@ -35,45 +56,19 @@ func SSEHandler(w http.ResponseWriter, r *http.Request) {
 	if sf < 0 || sf >= cap(frames) {
 		sf = 0
 	}
-	conn, buf, err := sse.ServeEvents(w)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer conn.Close()
 	// Play the movie, frame by frame
-	nbytes := 0
+	lw := w.(*httpxtra.LogWriter)
 	for n, f := range frames[sf:] {
-		nbytes += len(f.Buf)
-		m := &sse.MessageEvent{Id: strconv.Itoa(n + 1), Data: f.Buf}
-		if err = sse.SendEvent(buf, m); err != nil {
-			// Usually a broken pipe error.
-			// log.Println(e.Error())
-
-			// We update the bytes written to the handler so
-			// logging works fine.
-			if lw, ok := w.(*httpxtra.LogWriter); ok {
-				lw.Bytes += nbytes
-			}
-			break
+		_, err := fmt.Fprintf(w, "id: %d\ndata: %s\n\n", n+1, f.Buf)
+		if err != nil {
+			break // Client disconnected.
+		}
+		conn.Flush()
+		if lw != nil {
+			lw.Bytes += len(f.Buf)
 		}
 		time.Sleep(f.Time)
 	}
-}
-
-func main() {
-	err := loadMovie("./ASCIImation.txt.gz")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	http.HandleFunc("/", IndexHandler)
-	http.HandleFunc("/sse", SSEHandler)
-	s := http.Server{
-		Addr:    ":8080",
-		Handler: httpxtra.Handler{Logger: logger},
-	}
-	log.Fatal(s.ListenAndServe())
 }
 
 func logger(r *http.Request, created time.Time, status, bytes int) {
